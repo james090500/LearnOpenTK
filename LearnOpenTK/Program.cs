@@ -1,13 +1,17 @@
-﻿namespace LearnOpenTK
-{ 
-    class Program
+﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.Desktop;
+using System;
+
+namespace LearnOpenTK
+{
+    internal class Program
     {
-        static void Main(String[] args)
+        public static void Main(string[] args)
         {
-            using (Game game = new Game())
+            using (Game game = new Game("LearnOpenTK", 1280, 720))
             {
                 game.Run();
             }
-        }
+        }        
     }
 }
