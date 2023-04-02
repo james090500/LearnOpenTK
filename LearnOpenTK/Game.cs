@@ -12,6 +12,7 @@ namespace LearnOpenTK
         private int vertexBufferHandle;
         private int shaderProgramHandle;
         private int vertexArrayHandle;
+        private int indexBufferHandle; 
 
         public Game(string title = "Game1", int width = 1280, int height = 768)
             : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -49,9 +50,17 @@ namespace LearnOpenTK
             // X Y Z
             float[] vertices = new float[]
             {
-                0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //vertex 0 (Plus R, G, B A)
-                0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //vertex 1 (Plus R, G, B A)
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //vertex 2 (Plus R, G, B A)
+                //Pos 3 floats, color 4 floats
+                -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //vertex 0 (Plus R, G, B A)
+                0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //vertex 1 (Plus R, G, B A)
+                0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //vertex 2 (Plus R, G, B A)
+                -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, //vertex 3 (Plus R, G, B A)
+            };
+
+            //Square = 2 trianges, this is the order to draw the triangles
+            int[] indicies = new int[]
+            {
+                0, 1, 2, 0, 2, 3
             };
 
             //Sets the vertix handle to the buffer
@@ -62,6 +71,12 @@ namespace LearnOpenTK
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
             //This unbinds the buffer
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
+            indexBufferHandle = GL.GenBuffer();
+            //Elements Array is an index buffer
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferHandle);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, indicies.Length * sizeof(int), indicies, BufferUsageHint.StaticDraw);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
             this.vertexArrayHandle = GL.GenVertexArray();
             GL.BindVertexArray(this.vertexArrayHandle);
@@ -88,7 +103,7 @@ namespace LearnOpenTK
 
                 void main() {
                     vColor = aColor;
-                    gl_Position = vec4(aPosition, 1.0f);                    
+                    gl_Position = vec4(aPosition, 1.0f);                
                 }
                 ";
 
@@ -111,9 +126,21 @@ namespace LearnOpenTK
             GL.ShaderSource(vertexShaderHandle, vertexShaderCode);
             GL.CompileShader(vertexShaderHandle);
 
+            String vertexShaderLog = GL.GetShaderInfoLog(vertexShaderHandle);
+            if(vertexShaderLog != String.Empty)
+            {
+                Console.WriteLine(vertexShaderLog);
+            }
+
             int pixelShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(pixelShaderHandle, pixelShaderCode);
             GL.CompileShader(pixelShaderHandle);
+
+            String pixelShaderLog = GL.GetShaderInfoLog(pixelShaderHandle);
+            if (pixelShaderLog != String.Empty)
+            {
+                Console.WriteLine(pixelShaderHandle);
+            }
 
             //This is a shader program and we will attach shaders to the program
             shaderProgramHandle = GL.CreateProgram();
@@ -134,6 +161,9 @@ namespace LearnOpenTK
         {
             GL.BindVertexArray(0);
             GL.DeleteVertexArray(vertexArrayHandle);
+
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            GL.DeleteBuffer(indexBufferHandle);
 
             //Free resources when program closed
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
@@ -157,7 +187,9 @@ namespace LearnOpenTK
 
             GL.UseProgram(shaderProgramHandle);
             GL.BindVertexArray(vertexArrayHandle);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3); //Triangle has 3 sides
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferHandle);
+            //We use 0 as we are already setting up elements avbove
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
             //This brings the back buffer to the foreground so we can see
             this.Context.SwapBuffers();
