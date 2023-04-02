@@ -9,10 +9,8 @@ namespace LearnOpenTK
 {
     public class Game : GameWindow
     {
-        private int vertexBufferHandle;
+        private Block[] blocks = new Block[2];      
         private int shaderProgramHandle;
-        private int vertexArrayHandle;
-        private int indexBufferHandle; 
 
         public Game(string title = "Game1", int width = 1280, int height = 768)
             : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -44,66 +42,26 @@ namespace LearnOpenTK
 
             //This doesn't clear, but tell it what we want it to be when we do clear
             //This of it as a "Setup" code until we tell it do "Apply"
-            GL.ClearColor(Color4.SkyBlue);
-
-            //Define triangle vertices
-            // X Y Z
-            float[] vertices = new float[]
-            {
-                //Pos 3 floats, color 4 floats
-                -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //vertex 0 (Plus R, G, B A)
-                0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //vertex 1 (Plus R, G, B A)
-                0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //vertex 2 (Plus R, G, B A)
-                -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, //vertex 3 (Plus R, G, B A)
-            };
-
-            //Square = 2 trianges, this is the order to draw the triangles
-            int[] indicies = new int[]
-            {
-                0, 1, 2, 0, 2, 3
-            };
-
-            //Sets the vertix handle to the buffer
-            vertexBufferHandle = GL.GenBuffer();
-            //Bind the buffer so we work on that buffer
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferHandle);
-            //This sends the data to the buffer            
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-            //This unbinds the buffer
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
-            indexBufferHandle = GL.GenBuffer();
-            //Elements Array is an index buffer
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferHandle);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indicies.Length * sizeof(int), indicies, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-
-            this.vertexArrayHandle = GL.GenVertexArray();
-            GL.BindVertexArray(this.vertexArrayHandle);
-
-            //This sort of binds to the buffer and explains how it works
-            GL.BindBuffer(BufferTarget.ArrayBuffer, this.vertexBufferHandle);
-            // 0 = location of shader, 3 = XYZ           
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
-            GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 3 * sizeof(float));
-            GL.EnableVertexAttribArray(0);
-            GL.EnableVertexAttribArray(1);
-            GL.BindVertexArray(0);
-
+            GL.ClearColor(Color4.SkyBlue);                   
 
             //This is shader code
             string vertexShaderCode =
                 @"
                 #version 330 core
 
-                layout (location = 0) in vec3 aPosition;
+                uniform vec2 ViewportSize;
+
+                layout (location = 0) in vec2 aPosition;
                 layout (location = 1) in vec4 aColor; 
 
                 out vec4 vColor; 
 
                 void main() {
+                    float nx = aPosition.x / ViewportSize.x * 2f - 1f;
+                    float ny = aPosition.y / ViewportSize.y * 2f - 1f;                    
+                    gl_Position = vec4(nx, ny, 0, 1.0f);              
+
                     vColor = aColor;
-                    gl_Position = vec4(aPosition, 1.0f);                
                 }
                 ";
 
@@ -154,20 +112,24 @@ namespace LearnOpenTK
             GL.DeleteShader(vertexShaderHandle);
             GL.DeleteShader(pixelShaderHandle);
 
+            //This below gets the viewport and passes the information to shader
+            int[] viewport = new int[4];
+            GL.GetInteger(GetPName.Viewport, viewport);
+
+            GL.UseProgram(this.shaderProgramHandle);
+            int viewportSizeUniformLocation = GL.GetUniformLocation(this.shaderProgramHandle, "ViewportSize");
+            GL.Uniform2(viewportSizeUniformLocation, (float) viewport[2], (float) viewport[3]);
+            GL.UseProgram(0);
+
             base.OnLoad();
         }
 
         protected override void OnUnload()
         {
-            GL.BindVertexArray(0);
-            GL.DeleteVertexArray(vertexArrayHandle);
-
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            GL.DeleteBuffer(indexBufferHandle);
-
-            //Free resources when program closed
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GL.DeleteBuffer(vertexBufferHandle);
+            foreach (var block in blocks)
+            {
+                block.destroy();
+            };
 
             GL.UseProgram(0);
             GL.DeleteProgram(shaderProgramHandle);
@@ -180,19 +142,37 @@ namespace LearnOpenTK
             base.OnUpdateFrame(args);
         }
 
+        int block1 = 500;
+        int block2 = 100;
+
         protected override void OnRenderFrame(FrameEventArgs args)
         {
+            block1 = (block1 > 1000) ? 0 : block1 + 1;
+            block2 = (block2 > 1000) ? 0 : block2 + 1;
+
+            blocks[0] = new Block(50, 120, block1, 250);
+            blocks[1] = new Block(800, 80, block2, 100);
+            foreach (var block in blocks)
+            {
+                block.create();
+            }
+
             //We want to only clear the "Color" part (Back buffer)
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             GL.UseProgram(shaderProgramHandle);
-            GL.BindVertexArray(vertexArrayHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferHandle);
-            //We use 0 as we are already setting up elements avbove
-            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            foreach (var block in blocks)
+            {
+                block.render();
+            }
 
             //This brings the back buffer to the foreground so we can see
             this.Context.SwapBuffers();
+
+            foreach (var block in blocks)
+            {
+                block.destroy();
+            };
             base.OnRenderFrame(args);
         }
     }
