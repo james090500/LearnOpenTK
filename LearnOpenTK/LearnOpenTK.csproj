@@ -19,7 +19,7 @@
     <None Update="assets\wall.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="assets\wall.png">
+    <None Update="assets\walls.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="shaders\shader.frag">

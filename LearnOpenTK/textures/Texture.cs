@@ -1,7 +1,7 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 
-namespace LearnOpenTK
+namespace LearnOpenTK.textures
 {
     public class Texture
     {
