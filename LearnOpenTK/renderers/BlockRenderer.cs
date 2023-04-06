@@ -1,10 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Windowing.Desktop;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LearnOpenTK.renderers
 {
@@ -14,52 +9,64 @@ namespace LearnOpenTK.renderers
         private static int vertexBufferObject;
         private static int elementBufferObject;
 
-        private static float[] vertices = {
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        public readonly static float[] bottom_vertices =
+        {
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        };
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        public readonly static float[] top_vertices =
+        {
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        };
 
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        public readonly static float[] left_vertices = {
+            0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        };
 
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        public readonly static float[] right_vertices = {
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        };
 
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        public readonly static float[] front_vertices = {
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        };
 
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        public readonly static float[] back_vertices = {
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f
         };
 
         private static uint[] indices = {  // note that we start from 0!
-            0, 1, 3,   // first triangle
+            0, 1, 3,  // first triangle
             1, 2, 3    // second triangle
         };
 
@@ -70,9 +77,10 @@ namespace LearnOpenTK.renderers
             GL.BindVertexArray(vertexArrayObject);
 
             //Start of VBOs            
-            vertexBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject); //We are binding to this buffer to following calls reference it
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw); //Copy my data into the buffer        
+            float[] vertices = bottom_vertices.Concat(top_vertices).Concat(front_vertices).Concat(back_vertices).Concat(left_vertices).Concat(right_vertices).ToArray();
+            //vertexBufferObject = GL.GenBuffer();
+            //GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject); //We are binding to this buffer to following calls reference it
+            //GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw); //Copy my data into the buffer        
 
             //Bind the element buffer object. We can only bind if a VAO is bound
             elementBufferObject = GL.GenBuffer();
@@ -97,11 +105,6 @@ namespace LearnOpenTK.renderers
             int texCoordLocation = Game.shader.GetAttribLocation("aTexCoord");
             GL.EnableVertexAttribArray(texCoordLocation); //Enable the index
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-        }
-
-        public static int getVAO()
-        {
-            return vertexArrayObject;
         }
     }
 }

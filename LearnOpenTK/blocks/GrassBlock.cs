@@ -6,7 +6,7 @@ namespace LearnOpenTK.blocks
     {
         public GrassBlock(Vector3 position) : base(position)
         {
-            setTexture("awesomeface");
+            setTexture("grass");
         }
     }
 }

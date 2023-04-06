@@ -13,9 +13,10 @@ namespace LearnOpenTK
     public class Game : GameWindow {
         public static Shader shader;
         public static TextureManager textureManager = new TextureManager();
+        public static World world;
+        public static Camera camera;
 
-        Vector2 lastPos;
-        private Camera camera;
+        Vector2 lastPos;        
         bool firstMove;
 
         public Game(string title, int width, int height) : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -39,17 +40,21 @@ namespace LearnOpenTK
             GL.ClearColor(Color4.SkyBlue);
 
             // Load Textures
-            textureManager.loadTexture("walls", "assets/walls.png");
-            textureManager.loadTexture("awesomeface", "assets/awesomeface.png");
+            textureManager.loadTexture("stone", "assets/stone.png");
+            textureManager.loadTexture("grass", "assets/grass.png");
 
             // Load Shaders
             shader = new Shader("shaders/shader.vert", "shaders/shader.frag");
 
             // Load Blocks
-            BlockRenderer.Init();
+            //BlockRenderer.Init();
+
+            // Generate World
+            world = new World();
 
             // Note that we're translating the scene in the reverse direction of where we want to move.
-            camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
+            camera = new Camera(new Vector3(0, 20, 0), Size.X / (float)Size.Y);
+            
 
             this.IsVisible = true;
         }
@@ -66,14 +71,7 @@ namespace LearnOpenTK
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            for(int x = 0; x < 1; x++)
-            {
-                for(int z = 0; z < 1; z++)
-                {
-                    Chunk chunk = new Chunk(new Vector2(x, z));
-                    chunk.Generate();
-                }
-            }
+            world.Render();
 
             shader.SetMatrix4("view", camera.GetViewMatrix());
             shader.SetMatrix4("projection", camera.GetProjectionMatrix());

@@ -9,6 +9,7 @@ namespace LearnOpenTK.blocks
     {
         private Vector3 position;
         private Texture texture;
+        private bool visible = true;
 
         public Block(Vector3 position)
         {
@@ -34,11 +35,18 @@ namespace LearnOpenTK.blocks
             texture.Use();
         }
 
-        public void render()
+        public void setVisible(bool visible)
         {
+            this.visible = visible;
+        }
+
+        public void Render()
+        {
+            if (!visible) return;
+
             // Render the triangle/s
-            GL.BindVertexArray(BlockRenderer.getVAO());
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+            //GL.BindVertexArray(BlockRenderer.getVAO());
+            //GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
             texture.Use(TextureUnit.Texture0);
         }
     }

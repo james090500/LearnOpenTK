@@ -11,7 +11,7 @@ namespace LearnOpenTK.blocks
     {
         public StoneBlock(Vector3 position) : base(position)
         {
-            setTexture("walls");
+            setTexture("stone");
         }
     }
 }
