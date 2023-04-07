@@ -1,9 +1,5 @@
-﻿using OpenTK.Mathematics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LearnOpenTK.model;
+using OpenTK.Mathematics;
 
 namespace LearnOpenTK.blocks
 {
@@ -11,7 +7,11 @@ namespace LearnOpenTK.blocks
     {
         public StoneBlock(Vector3 position) : base(position)
         {
-            setTexture("stone");
+        }
+
+        public override int GetTexturePosition(Face face)
+        {
+            return 0;
         }
     }
 }

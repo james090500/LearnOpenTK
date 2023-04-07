@@ -1,4 +1,5 @@
 ﻿using LearnOpenTK.blocks;
+using LearnOpenTK.model;
 using LearnOpenTK.renderers;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -8,10 +9,10 @@ namespace LearnOpenTK.world
     internal class Chunk
     {
         private int vertexArrayObject;
+        private Mesh mesh;
         private Vector2 Region;
         private readonly int size = 16;
         private readonly int height = 16;
-        private readonly int volume = 16 * 16 * 256;
         private Block[,,] blocks = new Block[16, 16, 16];
  
         public Chunk(Vector2 region) {
@@ -24,18 +25,16 @@ namespace LearnOpenTK.world
             //Generate blocks
             for (int x = 0; x < size; x++)
             {
-                for (int z = 0; z < size; z++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int z = 0; z < size; z++)
                     {
                         Block block = null;
-                        if (y >= 0 && y <= 10)
+                        if (y < (height - 4))
                         {
-                            block = new StoneBlock(new Vector3());
-                        }
-                        if (y >= 10 && y <= 16)
-                        {
-                            block = new GrassBlock(new Vector3());
+                            block = new StoneBlock(new Vector3(x, y, z));
+                        } else {
+                            block = new GrassBlock(new Vector3(x, y, z));
                         }
                         blocks[x, y, z] = block;
                     }
@@ -43,58 +42,56 @@ namespace LearnOpenTK.world
             }
 
             //Generate mesh            
-            float[] tempMesh = { };
+            mesh = new Mesh();
             for (int x = 0; x < size; x++)
             {
-                for (int z = 0; z < size; z++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int z = 0; z < size; z++)
                     {
-                        if (x > 0 && blocks[x - 1, y, z] != null)
+                        if (x - 1 < 0 || blocks[x - 1, y, z] == null)
                         {
-                            tempMesh.Concat(BlockRenderer.left_vertices);
+                            mesh.Update(BlockModel.GetFace(Face.BACK), x, y, z, blocks[x,y,z].GetTexturePosition(Face.BACK));
                         }
-                        if (x > size && blocks[x + 1, y, z] != null)
+                        if (x + 1 > size - 1 || blocks[x + 1, y, z] == null)
                         {
-                            tempMesh.Concat(BlockRenderer.right_vertices);
+                            mesh.Update(BlockModel.GetFace(Face.FRONT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.FRONT));
                         }
-                        if (y > 0 && blocks[x, y - 1, z] != null)
+                        if (y - 1 < 0 || blocks[x, y - 1, z] == null)
                         {
-                            tempMesh.Concat(BlockRenderer.bottom_vertices);
+                            mesh.Update(BlockModel.GetFace(Face.BOTTOM), x, y, z, blocks[x, y, z].GetTexturePosition(Face.BOTTOM));
                         }
-                        if (y > height && blocks[x, y + 1, z] != null)
+                        if (y + 1 > height - 1 || blocks[x, y + 1, z] == null)
                         {
-                            tempMesh.Concat(BlockRenderer.top_vertices);
+                            mesh.Update(BlockModel.GetFace(Face.TOP), x, y, z, blocks[x, y, z].GetTexturePosition(Face.TOP));
                         }
-                        if (z > 0 && blocks[x, y, z - 1] != null)
+                        if (z - 1 < 0 || blocks[x, y, z - 1] == null)
                         {
-                            tempMesh.Concat(BlockRenderer.back_vertices);
+                            mesh.Update(BlockModel.GetFace(Face.LEFT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.LEFT));
                         }
-                        if (z > size && blocks[x, y, z + 1] != null)
+                        if (z + 1 > size - 1 || blocks[x, y, z + 1] == null)
                         {
-                            tempMesh.Concat(BlockRenderer.front_vertices);
+                            mesh.Update(BlockModel.GetFace(Face.RIGHT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.RIGHT));
                         }
                     }
                 }
             }
 
-            tempMesh = tempMesh.ToArray();
+            Console.WriteLine("Vertices Done");
 
-            uint[] indices = {  // note that we start from 0!
-                0, 1, 3,  // first triangle
-                1, 2, 3    // second triangle
-            };
-
+            //Bind to the vertex array
             vertexArrayObject = GL.GenVertexArray();
             GL.BindVertexArray(vertexArrayObject);
 
-            int vertexBuffer = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer); //We are binding to this buffer to following calls reference it
-            GL.BufferData(BufferTarget.ArrayBuffer, tempMesh.Length * sizeof(float), tempMesh, BufferUsageHint.StaticDraw); //Copy my data into the buffer     
+            //Start of VBOs            
+            int vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject); //We are binding to this buffer to following calls reference it       
+            GL.BufferData(BufferTarget.ArrayBuffer, mesh.getVertices().Length * sizeof(float), mesh.getVertices(), BufferUsageHint.StaticDraw); //Copy my data into the buffer        
 
+            //Bind the element buffer object. We can only bind if a VAO is bound
             int elementBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferObject);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, mesh.getIndices().Length * sizeof(int), mesh.getIndices(), BufferUsageHint.StaticDraw);
 
             //Load the shader
             Game.shader.Use();
@@ -111,6 +108,7 @@ namespace LearnOpenTK.world
             GL.EnableVertexAttribArray(vertexLocation); //Enable the index
             GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
 
+            //TODO REMEMBER I AM SPLITTIGN TEXTURE AND VERTICES IN MESH
             int texCoordLocation = Game.shader.GetAttribLocation("aTexCoord");
             GL.EnableVertexAttribArray(texCoordLocation); //Enable the index
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
@@ -118,24 +116,10 @@ namespace LearnOpenTK.world
 
         Random random = new Random();
         public void Render()
-        {
-            for (int x = 0; x < size; x++)
-            {
-                for (int z = 0; z < size; z++)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        Matrix4 model = Matrix4.CreateTranslation(new Vector3(x + (Region.X * size), y, z + (Region.Y * size)));
-                        Game.shader.SetMatrix4("model", model);
-
-                        // Render the triangle/s
-                        GL.BindVertexArray(vertexArrayObject);
-                        GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-                        blocks[x, y, z].Render();
-                    }
-                }
-            }
-
-        }
+        {            
+            GL.BindVertexArray(vertexArrayObject);                                  
+            GL.DrawArrays(PrimitiveType.Triangles, 0, mesh.getTriangleCount());
+            Game.shader.SetMatrix4("model", Matrix4.CreateTranslation(new Vector3(Region.X * size, 0, Region.Y * size)));
+        }        
     }
 }

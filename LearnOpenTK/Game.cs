@@ -35,13 +35,13 @@ namespace LearnOpenTK
             base.OnLoad();
 
             CursorState = CursorState.Grabbed;            
-
-            GL.Enable(EnableCap.DepthTest);
+            
             GL.ClearColor(Color4.SkyBlue);
+            GL.Enable(EnableCap.DepthTest);
 
             // Load Textures
-            textureManager.loadTexture("stone", "assets/stone.png");
-            textureManager.loadTexture("grass", "assets/grass.png");
+            textureManager.loadTexture("stone", "assets/atlas.png");
+            //textureManager.loadTexture("grass", "assets/grass.png");
 
             // Load Shaders
             shader = new Shader("shaders/shader.vert", "shaders/shader.frag");
@@ -71,8 +71,7 @@ namespace LearnOpenTK
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            world.Render();
-
+            world.Render();            
             shader.SetMatrix4("view", camera.GetViewMatrix());
             shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
