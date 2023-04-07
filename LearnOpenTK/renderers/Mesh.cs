@@ -7,10 +7,7 @@
         private List<int> indices = new List<int>();
 
         public void Update(float[] temp_vertices, int x, int y, int z, int texturePosition)
-        {           
-            //Times/Divide by 5 because we have 3 coords and 2 textures
-            float textureOffset = texturePosition * ((float)16 / (float)128);
-
+        {
             int baseIndex = this.vertices.Count;
             for (int i = 0; i < temp_vertices.Length / 5; i++)
             {
@@ -18,17 +15,20 @@
                 this.vertices.Add(temp_vertices[1 + i * 5] + y);
                 this.vertices.Add(temp_vertices[2 + i * 5] + z);
 
-                //Atlast is 128, textures are 16x                
-                if(textureOffset > 0)
-                {
-                    Console.WriteLine("sPRITE AT - " + (((temp_vertices[3 + i * 5] * 16) / 128) + textureOffset) + ", " + (((temp_vertices[4 + i * 5] * 16) / 128) + textureOffset));
-                }
 
-                //Coordinates probably need normalising? 
-                //Image seems to be inverted or somethinfg!!!
-                this.vertices.Add(((temp_vertices[3 + i * 5] * 16) / 128) + textureOffset);
-                this.vertices.Add(((temp_vertices[4 + i * 5] * 16) / 128) + textureOffset);
+                //OpenGL DOESN'T start at 0,0. It reads images like a graph so it's starts at 0,1. 
+                //This means if textures are at the top of the image, i need to read from the bottom
+                //Left first!
+                float texSize = (float)1 / (float)8;
+                this.vertices.Add(temp_vertices[3 + i * 5] == 0 ? texSize * (float)texturePosition : (texSize * (float)texturePosition) + texSize);
+                this.vertices.Add(temp_vertices[4 + i * 5] == 0 ? texSize * (float)7 : 1);
             }
+            //0, 0
+            //0.125, 0
+            //0.125, 0.125
+            //0.125, 0.125
+            //0, 0.125
+            //0, 0
 
             this.indices.Add(baseIndex + 0);
             this.indices.Add(baseIndex + 1);

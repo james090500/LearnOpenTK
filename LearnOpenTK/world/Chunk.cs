@@ -33,8 +33,14 @@ namespace LearnOpenTK.world
                         if (y < (height - 4))
                         {
                             block = new StoneBlock(new Vector3(x, y, z));
-                        } else {
+                        }
+                        else if(y == height-1)
+                        {
                             block = new GrassBlock(new Vector3(x, y, z));
+                        }
+                        else
+                        {
+                            block = new DirtBlock(new Vector3(x, y, z));
                         }
                         blocks[x, y, z] = block;
                     }

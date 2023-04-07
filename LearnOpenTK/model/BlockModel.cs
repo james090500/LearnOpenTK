@@ -23,21 +23,21 @@
         };
 
         static readonly float[] back_vertices = {
-            0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
             0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         };
 
         static readonly float[] front_vertices = {
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
             1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         };
 
         static readonly float[] bottom_vertices = {
