@@ -41,6 +41,8 @@ namespace LearnOpenTK
             
             GL.ClearColor(Color4.SkyBlue);
             GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             // Load Textures
             textureManager.loadTexture("stone", "assets/atlas.png");
