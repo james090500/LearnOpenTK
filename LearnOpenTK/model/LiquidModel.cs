@@ -2,15 +2,15 @@
 
 namespace LearnOpenTK.model
 {
-    public class BlockModel : Model
+    public class LiquidModel : Model
     {
         static readonly float[] left_vertices =
         {
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 0.9f, 0.0f, 1.0f, 1.0f,
+            1.0f, 0.9f, 0.0f, 1.0f, 1.0f,
+            0.0f, 0.9f, 0.0f, 0.0f, 1.0f,
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         };
 
@@ -18,28 +18,28 @@ namespace LearnOpenTK.model
         {
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
             1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, 0.9f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.9f, 1.0f, 1.0f, 1.0f,
+            0.0f, 0.9f, 1.0f, 0.0f, 1.0f,
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         };
 
         static readonly float[] back_vertices = {
-            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, 0.9f, 1.0f, 0.0f, 1.0f,
+            0.0f, 0.9f, 0.0f, 1.0f, 1.0f,
             0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            0.0f, 0.9f, 1.0f, 0.0f, 1.0f,
         };
 
         static readonly float[] front_vertices = {
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 0.9f, 1.0f, 0.0f, 1.0f,
+            1.0f, 0.9f, 0.0f, 1.0f, 1.0f,
             1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, 0.9f, 1.0f, 0.0f, 1.0f,
         };
 
         static readonly float[] bottom_vertices = {
@@ -52,13 +52,14 @@ namespace LearnOpenTK.model
         };
 
         static readonly float[] top_vertices = {
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f
+            0.0f, 0.9f, 0.0f, 0.0f, 1.0f,
+            1.0f, 0.9f, 0.0f, 1.0f, 1.0f,
+            1.0f, 0.9f, 1.0f, 1.0f, 0.0f,
+            1.0f, 0.9f, 1.0f, 1.0f, 0.0f,
+            0.0f, 0.9f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.9f, 0.0f, 0.0f, 1.0f
         };
+
 
         public override float[] GetFace(Face face)
         {

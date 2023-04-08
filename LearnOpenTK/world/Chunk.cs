@@ -3,6 +3,7 @@ using LearnOpenTK.model;
 using LearnOpenTK.renderers;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using static LearnOpenTK.model.BlockFace;
 
 namespace LearnOpenTK.world
 {
@@ -10,83 +11,140 @@ namespace LearnOpenTK.world
     {
         private int vertexArrayObject;
         private Mesh mesh;
-        private Vector2 Region;
-        private readonly int size = 16;
-        private readonly int height = 16;
-        private Block[,,] blocks = new Block[16, 16, 16];
- 
-        public Chunk(Vector2 region) {
-            this.Region = region;            
+        public readonly int chunkX = 0;
+        public readonly int chunkZ = 0;
+        public readonly int chunkSize = 16;
+        private int waterHeight = 64;
+        private Block[,,] blocks = new Block[16, 100, 16];
+        FastNoiseLite noise = new FastNoiseLite();
+
+        public Chunk(int x, int z) {  
+            this.chunkX = x;
+            this.chunkZ = z;
             this.Generate();
         }
 
         private void Generate()
         {
+            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
+            noise.SetFrequency(0.02f);
+
             //Generate blocks
-            for (int x = 0; x < size; x++)
+            Random random = new Random();
+            for (int x = 0; x < chunkSize; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int z = 0; z < chunkSize; z++)
                 {
-                    for (int z = 0; z < size; z++)
+                    int realBlockX = (chunkX * chunkSize) + x;
+                    int realBlockZ = (chunkZ * chunkSize) + z;
+                    int noisyHeight = 64 + (int)(noise.GetNoise(realBlockX, realBlockZ) * 10);
+                    for (int y = 0; y < noisyHeight; y++)
                     {
-                        Block block = null;
-                        if (y < (height - 4))
+                        Block block;
+                        Vector3 blockPos = new Vector3(realBlockX, y, realBlockZ);
+
+                        if (y == noisyHeight - 1 && noisyHeight > waterHeight)
                         {
-                            block = new StoneBlock(new Vector3(x, y, z));
+                            block = new GrassBlock(blockPos);
                         }
-                        else if(y == height-1)
+                        else if(y == noisyHeight - 1 && noisyHeight == waterHeight)
                         {
-                            block = new GrassBlock(new Vector3(x, y, z));
+                            block = new SandBlock(blockPos);
+                        }
+                        else if(y > noisyHeight - 5)
+                        {
+                            block = new DirtBlock(blockPos);
                         }
                         else
                         {
-                            block = new DirtBlock(new Vector3(x, y, z));
+                            block = new StoneBlock(blockPos);
                         }
                         blocks[x, y, z] = block;
+                    }
+
+                    if(noisyHeight <= waterHeight)
+                    {
+                        for(int y = noisyHeight; y < waterHeight; y++)
+                        {
+                            Vector3 blockPos = new Vector3(realBlockX, y, realBlockZ);
+                            blocks[x, y, z] = new WaterBlock(blockPos);
+                        }
                     }
                 }
             }
 
             //Generate mesh            
             mesh = new Mesh();
-            for (int x = 0; x < size; x++)
+            for (int x = 0; x < blocks.GetLength(0); x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < blocks.GetLength(1); y++)
                 {
-                    for (int z = 0; z < size; z++)
+                    for (int z = 0; z < blocks.GetLength(2); z++)
                     {
-                        if (x - 1 < 0 || blocks[x - 1, y, z] == null)
+                        if (blocks[x, y, z] == null) continue;
+
+                        Model model = BlockFace.GetBlockModel();
+                        if (blocks[x,y,z].GetType() == typeof(WaterBlock))
                         {
-                            mesh.Update(BlockModel.GetFace(Face.BACK), x, y, z, blocks[x,y,z].GetTexturePosition(Face.BACK));
+                            model = BlockFace.GetLiquidModel();
                         }
-                        if (x + 1 > size - 1 || blocks[x + 1, y, z] == null)
+
+                        //At the moment water is rendering its hidden sides
+                        //We need to basically say
+                        //ONLY RENDER IF NEXT TO NOTHING OR IF NEXT TO WATER AND IS NOT WATER
+
+                        if (x - 1 < 0 || blocks[x - 1, y, z] == null || blocks[x - 1, y, z].IsTransparent())
                         {
-                            mesh.Update(BlockModel.GetFace(Face.FRONT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.FRONT));
+                            if (blocks[x, y, z].GetType() != typeof(WaterBlock))
+                            {
+                                mesh.Update(model.GetFace(Face.BACK), x, y, z, blocks[x, y, z].GetTexturePosition(Face.BACK));
+                            }
                         }
-                        if (y - 1 < 0 || blocks[x, y - 1, z] == null)
+                        if (x + 1 > chunkSize - 1 || blocks[x + 1, y, z] == null || blocks[x + 1, y, z].IsTransparent())
                         {
-                            mesh.Update(BlockModel.GetFace(Face.BOTTOM), x, y, z, blocks[x, y, z].GetTexturePosition(Face.BOTTOM));
+                            if (blocks[x, y, z].GetType() != typeof(WaterBlock))
+                            {
+                                mesh.Update(model.GetFace(Face.FRONT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.FRONT));
+                            }
                         }
-                        if (y + 1 > height - 1 || blocks[x, y + 1, z] == null)
+                        if (y - 1 < 0 || blocks[x, y - 1, z] == null || blocks[x, y - 1, z].IsTransparent())
                         {
-                            mesh.Update(BlockModel.GetFace(Face.TOP), x, y, z, blocks[x, y, z].GetTexturePosition(Face.TOP));
+                            if (blocks[x, y, z].GetType() != typeof(WaterBlock))
+                            {
+                                mesh.Update(model.GetFace(Face.BOTTOM), x, y, z, blocks[x, y, z].GetTexturePosition(Face.BOTTOM));
+                            }
                         }
-                        if (z - 1 < 0 || blocks[x, y, z - 1] == null)
+                        if (y + 1 > blocks.GetLength(1) - 1 || blocks[x, y + 1, z] == null || blocks[x, y + 1, z].IsTransparent())
                         {
-                            mesh.Update(BlockModel.GetFace(Face.LEFT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.LEFT));
+                            if (blocks[x, y, z].GetType() != typeof(WaterBlock))
+                            {
+                                mesh.Update(model.GetFace(Face.TOP), x, y, z, blocks[x, y, z].GetTexturePosition(Face.TOP));
+                            } else if(y + 1 > blocks.GetLength(1) - 1 || blocks[x, y + 1, z] == null)
+                            {
+                                mesh.Update(model.GetFace(Face.TOP), x, y, z, blocks[x, y, z].GetTexturePosition(Face.TOP));
+                            }
                         }
-                        if (z + 1 > size - 1 || blocks[x, y, z + 1] == null)
+                        if (z - 1 < 0 || blocks[x, y, z - 1] == null || blocks[x, y, z - 1].IsTransparent())
                         {
-                            mesh.Update(BlockModel.GetFace(Face.RIGHT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.RIGHT));
+                            if (blocks[x, y, z].GetType() != typeof(WaterBlock))
+                            {
+                                mesh.Update(model.GetFace(Face.LEFT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.LEFT));
+                            }
+                        }
+                        if (z + 1 > chunkSize - 1 || blocks[x, y, z + 1] == null || blocks[x, y, z + 1].IsTransparent())
+                        {
+                            if (blocks[x, y, z].GetType() != typeof(WaterBlock))
+                            {
+                                mesh.Update(model.GetFace(Face.RIGHT), x, y, z, blocks[x, y, z].GetTexturePosition(Face.RIGHT));
+                            }
                         }
                     }
                 }
             }
 
-            Console.WriteLine("Vertices Done");
-
             //Bind to the vertex array
             vertexArrayObject = GL.GenVertexArray();
+            Console.WriteLine("HELLO " + vertexArrayObject);
             GL.BindVertexArray(vertexArrayObject);
 
             //Start of VBOs            
@@ -125,7 +183,13 @@ namespace LearnOpenTK.world
         {            
             GL.BindVertexArray(vertexArrayObject);                                  
             GL.DrawArrays(PrimitiveType.Triangles, 0, mesh.getTriangleCount());
-            Game.shader.SetMatrix4("model", Matrix4.CreateTranslation(new Vector3(Region.X * size, 0, Region.Y * size)));
-        }        
+            Game.shader.SetMatrix4("model", Matrix4.CreateTranslation(new Vector3(chunkX * chunkSize, 0, chunkZ * chunkSize)));
+        }  
+        
+        public void Unload()
+        {
+            Console.WriteLine("RIP " + vertexArrayObject);
+            GL.DeleteBuffer(vertexArrayObject);
+        }
     }
 }

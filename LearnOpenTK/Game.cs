@@ -7,6 +7,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Diagnostics;
 
 namespace LearnOpenTK
 {
@@ -18,6 +19,8 @@ namespace LearnOpenTK
 
         Vector2 lastPos;        
         bool firstMove;
+        Stopwatch stopwatch = new();
+        int framesPerSecond = 0;
 
         public Game(string title, int width, int height) : base(GameWindowSettings.Default, new NativeWindowSettings()
         {
@@ -53,8 +56,9 @@ namespace LearnOpenTK
             world = new World();
 
             // Note that we're translating the scene in the reverse direction of where we want to move.
-            camera = new Camera(new Vector3(0, 20, 0), Size.X / (float)Size.Y);
-            
+            camera = new Camera(new Vector3(50, 70, 50), Size.X / (float)Size.Y);
+
+            stopwatch.Start();
 
             this.IsVisible = true;
         }
@@ -71,11 +75,21 @@ namespace LearnOpenTK
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            world.Render();            
+            //world.UpdateLoaded();
+            world.Render();      
+            
             shader.SetMatrix4("view", camera.GetViewMatrix());
             shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
             SwapBuffers(); //Swaps from the live buffer to the next one
+
+            framesPerSecond++;
+            if (stopwatch.ElapsedMilliseconds >= 1000)
+            {
+                stopwatch.Restart();
+                Console.WriteLine(framesPerSecond + " FPS");
+                framesPerSecond = 0;
+            }
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -87,7 +101,7 @@ namespace LearnOpenTK
                 Close();
             }
 
-            const float cameraSpeed = 2.5f;
+            const float cameraSpeed = 5f;
             const float sensitivity = 0.2f;
 
             if (input.IsKeyDown(Keys.W))

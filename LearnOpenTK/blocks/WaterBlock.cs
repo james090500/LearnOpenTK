@@ -4,15 +4,16 @@ using OpenTK.Mathematics;
 using static LearnOpenTK.model.BlockFace;
 namespace LearnOpenTK.blocks
 {
-    internal class StoneBlock : Block
+    internal class WaterBlock : Block
     {
-        public StoneBlock(Vector3 position) : base(position)
+        public WaterBlock(Vector3 position) : base(position)
         {
+            SetTransparent(true);
         }
 
         public override int GetTexturePosition(Face face)
         {
-            return 0;
+            return 5;
         }
     }
 }
