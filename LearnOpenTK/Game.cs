@@ -1,6 +1,4 @@
-﻿using LearnOpenTK.blocks;
-using LearnOpenTK.renderers;
-using LearnOpenTK.textures;
+﻿using LearnOpenTK.textures;
 using LearnOpenTK.world;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -11,15 +9,17 @@ using System.Diagnostics;
 
 namespace LearnOpenTK
 {
-    public class Game : GameWindow {
-        public static Shader shader;
-        public static TextureManager textureManager = new TextureManager();
-        public static World world;
-        public static Camera camera;
+    public class Game : GameWindow
+    {
 
-        Vector2 lastPos;        
-        bool firstMove;
-        Stopwatch stopwatch = new();
+        private static Game Instance;
+        private Shader Shader;
+        private TextureManager TextureManager = new TextureManager();
+        private readonly World World;
+        private readonly Player Player;
+        private readonly Controls Controls = new();
+
+        Stopwatch stopwatch = new Stopwatch();
         int framesPerSecond = 0;
 
         public Game(string title, int width, int height) : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -28,7 +28,22 @@ namespace LearnOpenTK
             Size = (width, height),
             StartVisible = false,
         })
-        {}
+        {
+            stopwatch.Start();
+
+            //Set instance
+            Instance = this;
+
+            // Load Shaders
+            Shader = new Shader("shaders/Shader.vert", "shaders/Shader.frag");
+            Shader.SetColor("sky_color", Color4.SkyBlue);
+
+            // Generate World
+            World = new World();
+
+            // Note that we're translating the scene in the reverse direction of where we want to move.
+            Player = new Player();
+        }
 
         /**
          * This runs on initialisation once
@@ -37,38 +52,27 @@ namespace LearnOpenTK
         {
             base.OnLoad();
 
-            CursorState = CursorState.Grabbed;            
-            
+            CursorState = CursorState.Grabbed;
+
             GL.ClearColor(Color4.SkyBlue);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             // Load Textures
-            textureManager.loadTexture("stone", "assets/atlas.png");
-            //textureManager.loadTexture("grass", "assets/grass.png");
+            TextureManager.loadTexture("stone", "assets/atlas.png");
 
-            // Load Shaders
-            shader = new Shader("shaders/shader.vert", "shaders/shader.frag");
+            // Prepare the world
+            World.GetChunksToRender();
 
-            // Load Blocks
-            //BlockRenderer.Init();
-
-            // Generate World
-            world = new World();
-
-            // Note that we're translating the scene in the reverse direction of where we want to move.
-            camera = new Camera(new Vector3(50, 70, 50), Size.X / (float)Size.Y);
-
-            stopwatch.Start();
-
+            //Make window visible
             this.IsVisible = true;
         }
 
         protected override void OnUnload()
         {
             base.OnUnload();
-            shader.Dispose();
+            Shader.Dispose();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -77,11 +81,14 @@ namespace LearnOpenTK
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            //Load the shader
+            Shader.Use();
+
             //world.UpdateLoaded();
-            world.Render();      
-            
-            shader.SetMatrix4("view", camera.GetViewMatrix());
-            shader.SetMatrix4("projection", camera.GetProjectionMatrix());
+            World.Render();
+
+            Shader.SetMatrix4("view", Player.GetCamera().GetViewMatrix());
+            Shader.SetMatrix4("projection", Player.GetCamera().GetProjectionMatrix());
 
             SwapBuffers(); //Swaps from the live buffer to the next one
 
@@ -97,60 +104,8 @@ namespace LearnOpenTK
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
-
-            KeyboardState input = KeyboardState;
-            if(input.IsKeyDown(Keys.Escape)) {
-                Close();
-            }
-
-            const float cameraSpeed = 5f;
-            const float sensitivity = 0.2f;
-
-            if (input.IsKeyDown(Keys.W))
-            {
-                camera.Position += camera.Front * cameraSpeed * (float)args.Time; // Forward
-            }
-
-            if (input.IsKeyDown(Keys.S))
-            {
-                camera.Position -= camera.Front * cameraSpeed * (float)args.Time; // Backwards
-            }
-            if (input.IsKeyDown(Keys.A))
-            {
-                camera.Position -= camera.Right * cameraSpeed * (float)args.Time; // Left
-            }
-            if (input.IsKeyDown(Keys.D))
-            {
-                camera.Position += camera.Right * cameraSpeed * (float)args.Time; // Right
-            }
-            if (input.IsKeyDown(Keys.Space))
-            {
-                camera.Position += camera.Up * cameraSpeed * (float)args.Time; // Up
-            }
-            if (input.IsKeyDown(Keys.LeftShift))
-            {
-                camera.Position -= camera.Up * cameraSpeed * (float)args.Time; // Down
-            }
-
-            // Get the mouse state
-            var mouse = MouseState;
-
-            if (firstMove) // This bool variable is initially set to true.
-            {
-                lastPos = new Vector2(mouse.X, mouse.Y);
-                firstMove = false;
-            }
-            else
-            {
-                // Calculate the offset of the mouse position
-                var deltaX = mouse.X - lastPos.X;
-                var deltaY = mouse.Y - lastPos.Y;
-                lastPos = new Vector2(mouse.X, mouse.Y);
-
-                // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
-                camera.Yaw += deltaX * sensitivity;
-                camera.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
-            }
+            Controls.OnKeyboard(KeyboardState, args.Time);
+            Controls.OnMouse(MouseState);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -158,6 +113,31 @@ namespace LearnOpenTK
             base.OnResize(e);
 
             GL.Viewport(0, 0, e.Width, e.Height); //Just used to resize the viewport which is what we render to
+        }
+
+        public static Game GetInstance()
+        {
+            return Instance;
+        }
+
+        public Shader GetShader()
+        {
+            return Shader;
+        }
+
+        public TextureManager GetTextureManager()
+        {
+            return TextureManager;
+        }
+
+        public World GetWorld()
+        {
+            return World;
+        }
+
+        public Player GetPlayer()
+        {
+            return Player;
         }
     }
 }

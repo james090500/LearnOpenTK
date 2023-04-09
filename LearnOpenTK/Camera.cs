@@ -1,5 +1,4 @@
 ﻿using OpenTK.Mathematics;
-using System;
 
 namespace LearnOpenTK
 {
@@ -114,6 +113,17 @@ namespace LearnOpenTK
             // not be what you need for all cameras so keep this in mind if you do not want a FPS camera.
             _right = Vector3.Normalize(Vector3.Cross(_front, Vector3.UnitY));
             _up = Vector3.Normalize(Vector3.Cross(_right, _front));
+        }
+
+        public Vector3 getLookingAt(Vector2 screenSize, Vector2 mouse)
+        {
+            Matrix4 invViewMatrix = Matrix4.Invert(GetViewMatrix());
+            Matrix4 viewportMatrix = Matrix4.CreateOrthographicOffCenter(0, screenSize.X, 0, screenSize.Y, -1, 1);
+            Vector3 mousePos = new Vector3(mouse.X, screenSize.X - mouse.Y, 0); // Flip Y-axis to match NDC convention
+            Vector3 mouseNdc = Vector3.Unproject(mousePos, 0, 0, screenSize.X, screenSize.Y, 0, 1, viewportMatrix * GetProjectionMatrix() * invViewMatrix);
+            Vector3 rayDir = (mouseNdc - Position).Normalized();
+
+            return rayDir;
         }
     }
 }   

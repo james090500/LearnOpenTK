@@ -1,5 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using System.Xml.Linq;
 
 namespace LearnOpenTK
 {
@@ -73,10 +74,27 @@ namespace LearnOpenTK
             GL.Uniform1(location, value);
         }
 
+        public void SetColor(string name, Color4 color) { 
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.Uniform4(location, color);
+        }
+
         public void SetMatrix4(string name, Matrix4 matrix)
         {
             int location = GL.GetUniformLocation(Handle, name);
             GL.UniformMatrix4(location, true, ref matrix);
+        }
+
+        public void SetVector3(string name, Vector3 data)
+        {
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.Uniform3(location, data);
+        }
+
+        public void SetFloat(string name, float data)
+        {
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.Uniform1(location, data);
         }
 
         /**

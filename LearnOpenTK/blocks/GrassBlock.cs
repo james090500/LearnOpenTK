@@ -1,6 +1,5 @@
-﻿using LearnOpenTK.model;
-using OpenTK.Mathematics;
-using static LearnOpenTK.model.BlockFace;
+﻿using OpenTK.Mathematics;
+using static LearnOpenTK.renderers.model.BlockFace;
 
 namespace LearnOpenTK.blocks
 {
@@ -12,7 +11,7 @@ namespace LearnOpenTK.blocks
 
         public override int GetTexturePosition(Face face)
         {
-            return (face == Face.TOP) ? 2 : 3;
+            return (face == Face.TOP) ? 2 : (face == Face.BOTTOM) ? 1 : 3;
         }
     }
 }

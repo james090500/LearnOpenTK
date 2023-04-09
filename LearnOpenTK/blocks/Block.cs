@@ -1,30 +1,18 @@
-﻿using LearnOpenTK.model;
-using OpenTK.Mathematics;
-using static LearnOpenTK.model.BlockFace;
+﻿using OpenTK.Mathematics;
+using static LearnOpenTK.renderers.model.BlockFace;
 
 namespace LearnOpenTK.blocks
 {
     public abstract class Block
     {
-        Vector3 position;
-        bool Transparent;
+        Vector3 Position { get; set; }
+        public bool Transparent { get; set; } = false;
+        public bool Breakable { get; set; } = true;
+        public bool Liquid { get; set; } = false;
 
         public Block(Vector3 position)
         {
-            this.position = position;
-        }
-        
-        public void SetPosition(Vector3 position) { this.position = position; }
-        public Vector3 GetPosition() { return position; }
-
-        public bool IsTransparent()
-        {
-            return Transparent;
-        }
-
-        public void SetTransparent(bool transparent)
-        {
-            this.Transparent = transparent;
+            this.Position = position;
         }
 
         public abstract int GetTexturePosition(Face face);

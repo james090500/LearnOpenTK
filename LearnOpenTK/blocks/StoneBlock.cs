@@ -1,7 +1,6 @@
-﻿using LearnOpenTK.model;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 
-using static LearnOpenTK.model.BlockFace;
+using static LearnOpenTK.renderers.model.BlockFace;
 namespace LearnOpenTK.blocks
 {
     internal class StoneBlock : Block
