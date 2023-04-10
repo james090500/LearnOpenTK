@@ -75,6 +75,11 @@ namespace LearnOpenTK.world
             }
         }
 
+        public Block? GetBlockAt(Vector3 blockPos)
+        {
+            return GetBlockAt((int) blockPos.X, (int) blockPos.Y, (int) blockPos.Z);
+        }
+
         public Block? GetBlockAt(int x, int y, int z)
         {
             // Make sure Y is the min height
@@ -95,6 +100,11 @@ namespace LearnOpenTK.world
 
             return chunk.blocks[blockX, blockY, blockZ];
         }
+
+        public void SetBlockAt(Vector3 position, Block block)
+        {
+            SetBlockAt((int) position.X, (int) position.Y, (int) position.Z, block);
+        }        
 
         public void SetBlockAt(int x, int y, int z, Block block)
         {

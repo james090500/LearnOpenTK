@@ -5,7 +5,7 @@ namespace LearnOpenTK.blocks
 {
     public abstract class Block
     {
-        Vector3 Position { get; set; }
+        public Vector3 Position { get; }
         public bool Transparent { get; set; } = false;
         public bool Breakable { get; set; } = true;
         public bool Liquid { get; set; } = false;

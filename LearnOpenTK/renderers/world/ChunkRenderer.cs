@@ -1,12 +1,11 @@
 ﻿using LearnOpenTK.blocks;
 using LearnOpenTK.renderers.model;
-using LearnOpenTK.renderers.world;
 using LearnOpenTK.world;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using static LearnOpenTK.renderers.model.BlockFace;
 
-namespace LearnOpenTK.renderers
+namespace LearnOpenTK.renderers.world
 {
     public class ChunkRenderer
     {
@@ -25,8 +24,8 @@ namespace LearnOpenTK.renderers
 
         public void GenerateMesh()
         {
-            this.PrepBlocks();
-            this.PrepLiquid();
+            PrepBlocks();
+            PrepLiquid();
         }
 
         private void PrepBlocks()
@@ -41,7 +40,7 @@ namespace LearnOpenTK.renderers
                     {
                         if (chunk.blocks[x, y, z] == null || chunk.blocks[x, y, z].Liquid) continue;
 
-                        Model model = BlockFace.GetBlockModel();
+                        Model model = GetBlockModel();
 
                         //X Left and Right
                         if (ShouldRenderBlock(x - 1, y, z))
@@ -92,7 +91,7 @@ namespace LearnOpenTK.renderers
                     {
                         if (chunk.blocks[x, y, z] == null || !chunk.blocks[x, y, z].Liquid) continue;
 
-                        Model model = BlockFace.GetLiquidModel();
+                        Model model = GetLiquidModel();
 
                         //X Left and Right
                         if (ShouldRenderBlock(x - 1, y, z, true))
@@ -131,15 +130,16 @@ namespace LearnOpenTK.renderers
         }
 
         private bool ShouldRenderBlock(int x, int y, int z, bool isLiquid = false)
-        {         
+        {
             // Get the block
             Block block;
 
             // A check to see if the item is out of bounds
             if (
-                (x < 0 || x > Chunk.CHUNK_SIZE - 1) ||
-                (y < 0 || y > chunk.blocks.GetLength(1)) ||
-                (z < 0 || z > Chunk.CHUNK_SIZE - 1)) {
+                x < 0 || x > Chunk.CHUNK_SIZE - 1 ||
+                y < 0 || y > chunk.blocks.GetLength(1) ||
+                z < 0 || z > Chunk.CHUNK_SIZE - 1)
+            {
 
                 //int blockX = 0;
                 //int blockZ = 0;
@@ -165,18 +165,20 @@ namespace LearnOpenTK.renderers
                 //block = Game.GetInstance().GetWorld().GetBlockAt(blockX, y, blockZ);
                 //The above sort of works, still weird artifacts tho and doesn't block when chunks are being genned
                 return !isLiquid;
-            } else {
+            }
+            else
+            {
                 block = chunk.blocks[x, y, z];
-            }            
+            }
 
             // If no block, render it
             if (block == null) { return true; }
 
             // If the block is transparent but not water
-            if(!block.Transparent && !block.Liquid) { return false; }
+            if (!block.Transparent && !block.Liquid) { return false; }
 
             // Dont render liquid blocks insides
-            if(block.Liquid && isLiquid) { return false; }
+            if (block.Liquid && isLiquid) { return false; }
 
             return true;
         }

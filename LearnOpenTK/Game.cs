@@ -1,10 +1,9 @@
 ﻿using LearnOpenTK.textures;
 using LearnOpenTK.world;
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Diagnostics;
 
 namespace LearnOpenTK
@@ -14,6 +13,7 @@ namespace LearnOpenTK
 
         private static Game Instance;
         private Shader Shader;
+        private Shader SpriteShader;
         private TextureManager TextureManager = new TextureManager();
         private readonly World World;
         private readonly Player Player;
@@ -35,14 +35,15 @@ namespace LearnOpenTK
             Instance = this;
 
             // Load Shaders
-            Shader = new Shader("shaders/Shader.vert", "shaders/Shader.frag");
-            Shader.SetColor("sky_color", Color4.SkyBlue);
-
+            Shader = new Shader("shaders/shader.vert", "shaders/shader.frag");
+            SpriteShader = new Shader("shaders/2dshader.vert", "shaders/2dshader.frag");
+           
             // Generate World
             World = new World();
 
             // Note that we're translating the scene in the reverse direction of where we want to move.
             Player = new Player();
+            Player.Prepare();
         }
 
         /**
@@ -55,8 +56,7 @@ namespace LearnOpenTK
             CursorState = CursorState.Grabbed;
 
             GL.ClearColor(Color4.SkyBlue);
-            GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.DepthTest | EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             // Load Textures
@@ -73,6 +73,7 @@ namespace LearnOpenTK
         {
             base.OnUnload();
             Shader.Dispose();
+            SpriteShader.Dispose();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -84,11 +85,14 @@ namespace LearnOpenTK
             //Load the shader
             Shader.Use();
 
-            //world.UpdateLoaded();
+            // Render the world
             World.Render();
 
             Shader.SetMatrix4("view", Player.GetCamera().GetViewMatrix());
             Shader.SetMatrix4("projection", Player.GetCamera().GetProjectionMatrix());
+
+            // Render the player
+            Player.Render();
 
             SwapBuffers(); //Swaps from the live buffer to the next one
 
@@ -123,6 +127,11 @@ namespace LearnOpenTK
         public Shader GetShader()
         {
             return Shader;
+        }
+
+        public Shader GetSpriteShader()
+        {
+            return SpriteShader;
         }
 
         public TextureManager GetTextureManager()

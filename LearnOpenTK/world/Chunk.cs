@@ -1,5 +1,5 @@
 ﻿using LearnOpenTK.blocks;
-using LearnOpenTK.renderers;
+using LearnOpenTK.renderers.world;
 using OpenTK.Mathematics;
 
 namespace LearnOpenTK.world
