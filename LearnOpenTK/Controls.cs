@@ -1,51 +1,73 @@
 ﻿using LearnOpenTK.utils;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Linq.Expressions;
 
 namespace LearnOpenTK
 {
     public class Controls
     {
+        Player player = Game.GetInstance().GetPlayer();
 
         Vector2 lastPos;
         bool firstMove;        
         const float sensitivity = 0.2f;
         const float movementSpeed = 5f;
 
-        public void OnKeyboard(KeyboardState input, double Time)
+        public void OnKeyboard(KeyboardState input)
         {
-            Player player = Game.GetInstance().GetPlayer();
+            double Time = Game.GetInstance().DeltaTime;
 
             if (input.IsKeyDown(Keys.Escape))
             {
                 Game.GetInstance().Close();
             }
 
+            Vector3 newPos = player.GetCamera().Position;
             if (input.IsKeyDown(Keys.W))
             {
-                player.GetCamera().Position += player.GetCamera().Front * movementSpeed * (float)Time; // Forward
+                newPos += (player.GetCamera().Front * movementSpeed * (float)Time);
             }
             if (input.IsKeyDown(Keys.S))
             {
-                player.GetCamera().Position -= player.GetCamera().Front * movementSpeed * (float)Time; // Backwards
+                newPos -= (player.GetCamera().Front * movementSpeed * (float)Time);
             }
             if (input.IsKeyDown(Keys.A))
             {
-                player.GetCamera().Position -= player.GetCamera().Right * movementSpeed * (float)Time; // Left
+                newPos -= (player.GetCamera().Right * movementSpeed * (float)Time);
             }
             if (input.IsKeyDown(Keys.D))
             {
-                player.GetCamera().Position += player.GetCamera().Right * movementSpeed * (float)Time; // Right
+                newPos += (player.GetCamera().Right * movementSpeed * (float)Time);
             }
             if (input.IsKeyDown(Keys.Space))
             {
-                player.GetCamera().Position += player.GetCamera().Up * movementSpeed * (float)Time; // Up
+                newPos += (player.GetCamera().Up * movementSpeed * (float)Time);
             }
             if (input.IsKeyDown(Keys.LeftShift))
             {
-                player.GetCamera().Position -= player.GetCamera().Up * movementSpeed * (float)Time; // Down
+                newPos -= (player.GetCamera().Up * movementSpeed * (float)Time);
             }
+
+            /**
+             * Basic collision testing
+             */
+            bool notAtSolid = true;
+            while (notAtSolid && Game.GetInstance().GetWorld().GetChunkLoaded(newPos))
+            {
+                Vector3 feetPos = newPos - new Vector3(0, 2.0f, 0);
+                notAtSolid = (Game.GetInstance().GetWorld().GetBlockAt(feetPos) == null);
+                if (notAtSolid)
+                {
+                    newPos -= new Vector3(0f, 0.01f, 0f);
+                }
+            }
+            
+            if (Game.GetInstance().GetWorld().GetBlockAt(newPos) == null && Game.GetInstance().GetWorld().GetChunkLoaded(newPos))
+            {
+                player.GetCamera().Position = newPos + new Vector3(0f, 0.1f, 0f);
+            }
+            //player.GetCamera().Position = newPos;
+
             if (input.IsKeyDown(Keys.F3))
             {
                 DebugMenu.Toggle();
@@ -54,8 +76,6 @@ namespace LearnOpenTK
 
         public void OnMouse(MouseState mouse)
         {
-            Player player = Game.GetInstance().GetPlayer();
-
             if (firstMove) // This bool variable is initially set to true.
             {
                 lastPos = new Vector2(mouse.X, mouse.Y);
@@ -84,5 +104,10 @@ namespace LearnOpenTK
             }
         }
 
+        public void OnMouseWheel(float offset)
+        {
+            player.OnScrollWheel((int) offset);
+        }
+        
     }
 }

@@ -5,7 +5,7 @@ namespace LearnOpenTK.blocks
 {
     internal class WaterBlock : Block
     {
-        public WaterBlock(Vector3 position) : base(position)
+        public WaterBlock() : base()
         {
             this.Transparent = true;
             this.Breakable = false;

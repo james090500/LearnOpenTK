@@ -12,12 +12,13 @@ namespace LearnOpenTK
     {
 
         private static Game Instance;
+        public double DeltaTime;
         private Shader Shader;
         private Shader SpriteShader;
         private TextureManager TextureManager = new TextureManager();
         private readonly World World;
         private readonly Player Player;
-        private readonly Controls Controls = new();
+        private readonly Controls Controls;
 
         Stopwatch stopwatch = new Stopwatch();
         int framesPerSecond = 0;
@@ -44,6 +45,9 @@ namespace LearnOpenTK
             // Note that we're translating the scene in the reverse direction of where we want to move.
             Player = new Player();
             Player.Prepare();
+
+            // Controlls
+            Controls = new Controls();
         }
 
         /**
@@ -109,8 +113,15 @@ namespace LearnOpenTK
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
-            Controls.OnKeyboard(KeyboardState, args.Time);
+            DeltaTime = args.Time;
             Controls.OnMouse(MouseState);
+            Controls.OnKeyboard(KeyboardState);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            Controls.OnMouseWheel(e.OffsetY);
         }
 
         protected override void OnResize(ResizeEventArgs e)

@@ -43,20 +43,21 @@ namespace LearnOpenTK.world
 
                         if (y == noisyHeight - 1 && noisyHeight > waterHeight)
                         {
-                            block = new GrassBlock(blockPos);
+                            block = new GrassBlock();
                         }
                         else if (y == noisyHeight - 1 && noisyHeight == waterHeight)
                         {
-                            block = new SandBlock(blockPos);
+                            block = new SandBlock();
                         }
                         else if (y > noisyHeight - 5)
                         {
-                            block = new DirtBlock(blockPos);
+                            block = new DirtBlock();
                         }
                         else
                         {
-                            block = new StoneBlock(blockPos);
+                            block = new StoneBlock();                            
                         }
+                        block.Position = blockPos;
                         blocks[x, y, z] = block;
                     }
 
@@ -65,7 +66,8 @@ namespace LearnOpenTK.world
                         for (int y = noisyHeight; y < waterHeight; y++)
                         {
                             Vector3 blockPos = new Vector3(realBlockX, y, realBlockZ);
-                            blocks[x, y, z] = new WaterBlock(blockPos);
+                            blocks[x, y, z] = new WaterBlock();
+                            blocks[x, y, z].Position = blockPos;
                         }
                     }
                 }

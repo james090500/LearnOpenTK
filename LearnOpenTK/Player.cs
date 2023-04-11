@@ -6,6 +6,9 @@ namespace LearnOpenTK
 {
     public class Player : PlayerEntity
     {
+
+        private int scrollItem = 0;
+        private Block holdingBlock = new StoneBlock();
         private Camera camera;
 
         public Player()
@@ -30,32 +33,51 @@ namespace LearnOpenTK
         {
             float looped = 0.0f;
             float distance = 5.0f;
-            float unitSize = 1.0f;
-
-            float directionX = GetCamera().Front.X;
-            float directionY = GetCamera().Front.Y;
-            float directionZ = GetCamera().Front.Z;
 
             while (looped < distance)
             {
-                float blockX = GetPosition().X + (directionX * (unitSize * (looped + unitSize)));
-                float blockY = GetPosition().Y + (directionY * (unitSize * (looped + unitSize)));
-                float blockZ = GetPosition().Z + (directionZ * (unitSize * (looped + unitSize)));
+                //Floor to avoid automatic rounding
+                float checkBlockX = (int)Math.Floor(GetPosition().X + (GetCamera().Front.X * looped));
+                float checkBlockY = (int)Math.Floor(GetPosition().Y + (GetCamera().Front.Y * looped));
+                float checkBlockZ = (int)Math.Floor(GetPosition().Z + (GetCamera().Front.Z * looped));
+                Vector3 checkBlockPos = new Vector3(checkBlockX, checkBlockY, checkBlockZ);
 
-                Vector3 blockPos = new Vector3(blockX, blockY, blockZ);
-                Block? block = Game.GetInstance().GetWorld().GetBlockAt(blockPos);
-
-                if (block != null && !block.Liquid)
+                Block? block = Game.GetInstance().GetWorld().GetBlockAt(checkBlockPos);
+                if (block != null)
                 {
-                    float placeableX = GetPosition().X + (directionX * (unitSize * looped));
-                    float placeableY = GetPosition().Y + (directionY * (unitSize * looped));
-                    float placeableZ = GetPosition().Z + (directionZ * (unitSize * looped));
-                    
-                    Vector3 placeablePos = new Vector3(placeableX, placeableY, placeableZ);
-                    Game.GetInstance().GetWorld().SetBlockAt(placeablePos, new StoneBlock(placeablePos));
-                    return;
+                    float placeBlockX = (int)Math.Floor(GetPosition().X + (GetCamera().Front.X * (looped - 0.5f)));
+                    float placeBlockY = (int)Math.Floor(GetPosition().Y + (GetCamera().Front.Y * (looped - 0.5f)));
+                    float placeBlockZ = (int)Math.Floor(GetPosition().Z + (GetCamera().Front.Z * (looped - 0.5f)));
+                    Vector3 placeBlockPos = new Vector3(placeBlockX, placeBlockY, placeBlockZ);
+
+                    Block placeBlock = holdingBlock.Clone();
+                    placeBlock.Position = placeBlockPos;
+                    Game.GetInstance().GetWorld().SetBlockAt(placeBlockPos, placeBlock);
+
+                    break;
                 }
-                looped++;
+
+                looped += 0.5f;
+            }
+        }
+
+        public void OnScrollWheel(int offset)
+        {
+            scrollItem = (scrollItem - 1 + offset + 4) % 4 + 1;
+
+            switch (scrollItem) {
+                case 1:
+                    holdingBlock = new StoneBlock();
+                    break;
+                case 2:
+                    holdingBlock = new GrassBlock();
+                    break;
+                case 3:
+                    holdingBlock = new DirtBlock();
+                    break;
+                case 4:
+                    holdingBlock = new SandBlock();
+                    break;
             }
         }
 
@@ -63,42 +85,23 @@ namespace LearnOpenTK
         {
             float looped = 0.0f;
             float distance = 5.0f;
-            float unitSize = 1.0f;
-
-            float directionX = GetCamera().Front.X;
-            float directionY = GetCamera().Front.Y;
-            float directionZ = GetCamera().Front.Z;
-
+            
             while (looped < distance)
             {
-                //If facing X
-                float blockX = GetPosition().X;
-                float blockY = GetPosition().Y + Math.Sign(directionY * looped);
-                float blockZ = GetPosition().Z;
-
-                if (directionX > directionZ)
-                {
-                    blockX = GetPosition().X + Math.Sign(directionX * looped);
-                } else
-                {
-                    blockZ = GetPosition().Z + Math.Sign(directionZ * looped);
-                }
-                
-
-                //If I am looking at Z Plane, the X Value is changing when it shouldnt
-
-                Console.WriteLine("Player at (" + GetPosition().X + ", " + GetPosition().Y + ", " + GetPosition().Z + ") --- Checking Block at (" + blockX + ", " + blockY + ", " + blockZ + ")");
+                //Floor to avoid automatic rounding
+                float blockX = (int) Math.Floor(GetPosition().X + (GetCamera().Front.X * looped));
+                float blockY = (int) Math.Floor(GetPosition().Y + (GetCamera().Front.Y * looped));
+                float blockZ = (int) Math.Floor(GetPosition().Z + (GetCamera().Front.Z * looped));
 
                 Vector3 blockPos = new Vector3(blockX, blockY, blockZ);
 
                 Block? block = Game.GetInstance().GetWorld().GetBlockAt(blockPos);
                 if (block != null)
                 {
-                    Console.WriteLine(block);
                     return block;
                 }
 
-                looped += 0.01f;
+                looped += 0.5f;
             }
 
             return null;

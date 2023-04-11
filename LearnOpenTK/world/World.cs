@@ -98,7 +98,13 @@ namespace LearnOpenTK.world
             int blockY = y;
             int blockZ = z - (regionY * Chunk.CHUNK_SIZE);
 
-            return chunk.blocks[blockX, blockY, blockZ];
+            if(blockX > Chunk.CHUNK_SIZE || blockY > chunk.blocks.GetLength(1) || blockZ > Chunk.CHUNK_SIZE)
+            {
+                return null;
+            } else
+            {
+                return chunk.blocks[blockX, blockY, blockZ];
+            }
         }
 
         public void SetBlockAt(Vector3 position, Block block)
@@ -121,8 +127,31 @@ namespace LearnOpenTK.world
             Chunk chunk;
             if (activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
             {
+                if (block != null)
+                {
+                    block.Position = new Vector3(x, y, z);
+                }
+
                 chunk.blocks[blockX, blockY, blockZ] = block;
                 chunk.getChunkRenderer().GenerateMesh();
+            }
+        }
+
+        public bool GetChunkLoaded(Vector3 position)
+        {
+            // Make sure Y is the min height
+            if (position.Y < 0) return false;
+
+            int regionX = (int)Math.Floor((double) position.X / Chunk.CHUNK_SIZE);
+            int regionY = (int)Math.Floor((double) position.Z / Chunk.CHUNK_SIZE);
+
+            Chunk chunk;
+            if (!activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
+            {
+                return false;
+            } else
+            {
+                return chunk.blocks.Length > 0;
             }
         }
     }
