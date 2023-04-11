@@ -56,7 +56,8 @@ namespace LearnOpenTK
             CursorState = CursorState.Grabbed;
 
             GL.ClearColor(Color4.SkyBlue);
-            GL.Enable(EnableCap.DepthTest | EnableCap.Blend);
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             // Load Textures

@@ -71,18 +71,34 @@ namespace LearnOpenTK
 
             while (looped < distance)
             {
-                float blockX = GetPosition().X + (directionX * (unitSize * looped));
-                float blockY = GetPosition().Y + (directionY * (unitSize * looped));
-                float blockZ = GetPosition().Z + (directionZ * (unitSize * looped));
+                //If facing X
+                float blockX = GetPosition().X;
+                float blockY = GetPosition().Y + Math.Sign(directionY * looped);
+                float blockZ = GetPosition().Z;
+
+                if (directionX > directionZ)
+                {
+                    blockX = GetPosition().X + Math.Sign(directionX * looped);
+                } else
+                {
+                    blockZ = GetPosition().Z + Math.Sign(directionZ * looped);
+                }
+                
+
+                //If I am looking at Z Plane, the X Value is changing when it shouldnt
+
+                Console.WriteLine("Player at (" + GetPosition().X + ", " + GetPosition().Y + ", " + GetPosition().Z + ") --- Checking Block at (" + blockX + ", " + blockY + ", " + blockZ + ")");
 
                 Vector3 blockPos = new Vector3(blockX, blockY, blockZ);
 
                 Block? block = Game.GetInstance().GetWorld().GetBlockAt(blockPos);
                 if (block != null)
                 {
+                    Console.WriteLine(block);
                     return block;
                 }
-                looped++;
+
+                looped += 0.01f;
             }
 
             return null;

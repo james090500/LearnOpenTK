@@ -35,6 +35,7 @@ namespace LearnOpenTK.renderers.entity
             Game.GetInstance().GetSpriteShader().Use();
             GL.BindVertexArray(vertexBufferObject);           
             GL.DrawArrays(PrimitiveType.Lines, 0, 4);
+
             GL.Enable(EnableCap.DepthTest);
         }
     }
