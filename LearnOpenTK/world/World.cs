@@ -53,13 +53,14 @@ namespace LearnOpenTK.world
         public void Render()
         {
             GetChunksToRender();
-            //1 Chunk mesh per frame
-            foreach (KeyValuePair<Vector2, Chunk> chunk in newChunks)
+
+            // Generate 1 Chunk mesh per frame
+            if (newChunks.Count > 0)
             {
-                newChunks.Remove(chunk.Key);
-                activeChuks.Add(chunk.Key, chunk.Value);
+                KeyValuePair<Vector2, Chunk> chunk = newChunks.First();
                 chunk.Value.getChunkRenderer().GenerateMesh();
-                break;
+                activeChuks.Add(chunk.Key, chunk.Value);
+                newChunks.Remove(chunk.Key);
             }
 
             //Render all chunks
@@ -77,16 +78,16 @@ namespace LearnOpenTK.world
 
         public Block? GetBlockAt(Vector3 blockPos)
         {
-            return GetBlockAt((int) blockPos.X, (int) blockPos.Y, (int) blockPos.Z);
+            return GetBlockAt(blockPos.X, blockPos.Y, blockPos.Z);
         }
 
-        public Block? GetBlockAt(int x, int y, int z)
+        public Block? GetBlockAt(float x, float y, float z)
         {
             // Make sure Y is the min height
             if (y < 0) return null;
 
-            int regionX = (int)Math.Floor((double)x / Chunk.CHUNK_SIZE);
-            int regionY = (int)Math.Floor((double)z / Chunk.CHUNK_SIZE);
+            int regionX = (int)Math.Floor(x / Chunk.CHUNK_SIZE);
+            int regionY = (int)Math.Floor(z / Chunk.CHUNK_SIZE);
 
             Chunk chunk;
             if(!activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
@@ -94,11 +95,11 @@ namespace LearnOpenTK.world
                 return null;
             }
 
-            int blockX = x - (regionX * Chunk.CHUNK_SIZE);
-            int blockY = y;
-            int blockZ = z - (regionY * Chunk.CHUNK_SIZE);
+            int blockX = (int) Math.Floor(x - (regionX * Chunk.CHUNK_SIZE));
+            int blockY = (int) Math.Floor(y);
+            int blockZ = (int) Math.Floor(z - (regionY * Chunk.CHUNK_SIZE));
 
-            if(blockX > Chunk.CHUNK_SIZE || blockY > chunk.blocks.GetLength(1) || blockZ > Chunk.CHUNK_SIZE)
+            if(blockX >= Chunk.CHUNK_SIZE || blockY >= chunk.blocks.GetLength(1) || blockZ >= Chunk.CHUNK_SIZE)
             {
                 return null;
             } else

@@ -209,7 +209,7 @@ namespace LearnOpenTK.renderers.world
 
         public void Render()
         {
-            Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(new Vector3(chunk.chunkX * Chunk.CHUNK_SIZE, 0, chunk.chunkY * Chunk.CHUNK_SIZE)));
+            Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(chunk.GetPosition()));
 
             GL.BindVertexArray(blockVAO);
             GL.DrawArrays(PrimitiveType.Triangles, 0, blockMesh.getTriangleCount());
@@ -217,7 +217,7 @@ namespace LearnOpenTK.renderers.world
 
         public void RenderLiquid()
         {
-            Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(new Vector3(chunk.chunkX * Chunk.CHUNK_SIZE, 0, chunk.chunkY * Chunk.CHUNK_SIZE)));
+            Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(chunk.GetPosition()));
 
             GL.BindVertexArray(liquidVAO);
             GL.DrawArrays(PrimitiveType.Triangles, 0, liquidMesh.getTriangleCount());

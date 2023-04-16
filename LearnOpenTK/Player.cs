@@ -10,6 +10,7 @@ namespace LearnOpenTK
         private int scrollItem = 0;
         private Block holdingBlock = new StoneBlock();
         private Camera camera;
+        private bool falling = true;
 
         public Player()
         {
@@ -18,7 +19,7 @@ namespace LearnOpenTK
 
         public Camera GetCamera() { return camera; }
 
-        public Vector3 GetPosition() { return camera.Position; }
+        public Vector3 GetPosition() { return camera.Position - GetHeight(); }
 
         public void OnLeftClick()
         {
@@ -81,7 +82,7 @@ namespace LearnOpenTK
             }
         }
 
-        public Block GetLookingAt()
+        public Block? GetLookingAt()
         {
             float looped = 0.0f;
             float distance = 5.0f;
@@ -107,38 +108,58 @@ namespace LearnOpenTK
             return null;
         }
 
-        public void GetCompass()
+        public bool IsFalling()
         {
-            // calculate the absolute value of x and z
-            double absX = Math.Abs(GetCamera().Front.X);
-            double absZ = Math.Abs(GetCamera().Front.Z);
+            Vector3 feetPos = GetPosition();
+            Block? block = Game.GetInstance().GetWorld().GetBlockAt(feetPos);
 
-            // calculate the direction to the closest cardinal point
-            string direction;
-            if (absX > absZ)
-            {
-                if (GetCamera().Front.X > 0) // east
-                {
-                    direction = "East";
-                }
-                else // west
-                {
-                    direction = "West";
-                }
-            }
-            else
-            {
-                if (GetCamera().Front.Z > 0) // north
-                {
-                    direction = "North";
-                }
-                else // south
-                {
-                    direction = "South";
-                }
-            }
+            SetFalling(block == null || block.Liquid);
 
-            Console.WriteLine("The closest cardinal direction is " + direction);
+            return falling;
         }
+
+        public void SetFalling(bool falling)
+        {
+            this.falling = falling;
+        }
+
+        public Vector3 GetHeight()
+        {
+            return new Vector3(0, 1.8f, 0);
+        }
+
+        //public void GetCompass()
+        //{
+        //    // calculate the absolute value of x and z
+        //    double absX = Math.Abs(GetCamera().Front.X);
+        //    double absZ = Math.Abs(GetCamera().Front.Z);
+
+        //    // calculate the direction to the closest cardinal point
+        //    string direction;
+        //    if (absX > absZ)
+        //    {
+        //        if (GetCamera().Front.X > 0) // east
+        //        {
+        //            direction = "East";
+        //        }
+        //        else // west
+        //        {
+        //            direction = "West";
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (GetCamera().Front.Z > 0) // north
+        //        {
+        //            direction = "North";
+        //        }
+        //        else // south
+        //        {
+        //            direction = "South";
+        //        }
+        //    }
+
+        //    Console.WriteLine("The closest cardinal direction is " + direction);
+        //}
     }
 }

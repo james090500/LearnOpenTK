@@ -1,6 +1,8 @@
-﻿using LearnOpenTK.utils;
+﻿using LearnOpenTK.blocks;
+using LearnOpenTK.utils;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Linq.Expressions;
 
 namespace LearnOpenTK
 {
@@ -22,7 +24,7 @@ namespace LearnOpenTK
                 Game.GetInstance().Close();
             }
 
-            Vector3 newPos = player.GetCamera().Position;
+            Vector3 newPos = player.GetPosition();
             if (input.IsKeyDown(Keys.W))
             {
                 newPos += (player.GetCamera().Front * movementSpeed * (float)Time);
@@ -51,22 +53,29 @@ namespace LearnOpenTK
             /**
              * Basic collision testing
              */
-            bool notAtSolid = true;
-            while (notAtSolid && Game.GetInstance().GetWorld().GetChunkLoaded(newPos))
+            if (Game.GetInstance().GetWorld().GetChunkLoaded(newPos))
             {
-                Vector3 feetPos = newPos - new Vector3(0, 2.0f, 0);
-                notAtSolid = (Game.GetInstance().GetWorld().GetBlockAt(feetPos) == null);
-                if (notAtSolid)
+                Block? blockHead = Game.GetInstance().GetWorld().GetBlockAt(newPos + player.GetHeight());
+                Block? blockFeet = Game.GetInstance().GetWorld().GetBlockAt(newPos);
+                //both block are null
+                //or
+                //both blocks are water
+                //or either a block is null or water
+                if ((blockHead == null || blockHead.Liquid) && (blockFeet == null || blockFeet.Liquid))
                 {
-                    newPos -= new Vector3(0f, 0.01f, 0f);
+                    if (player.IsFalling())
+                    {
+                        Vector3 testPos = newPos - new Vector3(0, 0.1f, 0);
+                        Block? fallingBlock = Game.GetInstance().GetWorld().GetBlockAt(newPos);
+                        if (fallingBlock == null || fallingBlock.Liquid)
+                        {
+                            newPos = testPos;
+                        }
+                    }
+                    player.GetCamera().Position = newPos + player.GetHeight();
                 }
+
             }
-            
-            if (Game.GetInstance().GetWorld().GetBlockAt(newPos) == null && Game.GetInstance().GetWorld().GetChunkLoaded(newPos))
-            {
-                player.GetCamera().Position = newPos + new Vector3(0f, 0.1f, 0f);
-            }
-            //player.GetCamera().Position = newPos;
 
             if (input.IsKeyDown(Keys.F3))
             {

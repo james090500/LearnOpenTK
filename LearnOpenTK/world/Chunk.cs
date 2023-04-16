@@ -74,6 +74,11 @@ namespace LearnOpenTK.world
             }
         }
 
+        public Vector3 GetPosition()
+        {
+            return new Vector3(chunkX * CHUNK_SIZE, 0, chunkY * CHUNK_SIZE);
+        }
+
         public ChunkRenderer getChunkRenderer()
         {
             return this.chunkRenderer;
