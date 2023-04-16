@@ -1,5 +1,6 @@
 ﻿using LearnOpenTK.blocks;
 using LearnOpenTK.utils;
+using OpenTK.Graphics.ES20;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Linq.Expressions;
@@ -13,7 +14,7 @@ namespace LearnOpenTK
         Vector2 lastPos;
         bool firstMove;        
         const float sensitivity = 0.2f;
-        const float movementSpeed = 5f;
+        const float jumpingSpeed = 5f;
 
         public void OnKeyboard(KeyboardState input)
         {
@@ -24,59 +25,74 @@ namespace LearnOpenTK
                 Game.GetInstance().Close();
             }
 
-            Vector3 newPos = player.GetPosition();
-            if (input.IsKeyDown(Keys.W))
-            {
-                newPos += (player.GetCamera().Front * movementSpeed * (float)Time);
-            }
-            if (input.IsKeyDown(Keys.S))
-            {
-                newPos -= (player.GetCamera().Front * movementSpeed * (float)Time);
-            }
-            if (input.IsKeyDown(Keys.A))
-            {
-                newPos -= (player.GetCamera().Right * movementSpeed * (float)Time);
-            }
-            if (input.IsKeyDown(Keys.D))
-            {
-                newPos += (player.GetCamera().Right * movementSpeed * (float)Time);
-            }
-            if (input.IsKeyDown(Keys.Space))
-            {
-                newPos += (player.GetCamera().Up * movementSpeed * (float)Time);
-            }
+            Vector3 playerPos = player.GetPosition();
+            Vector3 playerFront = new Vector3(player.GetCamera().Front.X, 0, player.GetCamera().Front.Z);
+
+            if (!Game.GetInstance().GetWorld().GetChunkLoaded(playerPos)) return;
+
+            /**
+             * Sneaking and Sprinting
+             */
             if (input.IsKeyDown(Keys.LeftShift))
             {
-                newPos -= (player.GetCamera().Up * movementSpeed * (float)Time);
+                player.SetSneaking(true);
+            }                          
+            if(input.IsKeyDown(Keys.LeftControl))
+            {
+                player.SetSprinting(true);
+            }
+
+            if (input.IsKeyReleased(Keys.LeftShift))
+            {
+                player.SetSneaking(false);
+            }
+            if (input.IsKeyReleased(Keys.LeftControl))
+            {
+                player.SetSprinting(false);
             }
 
             /**
-             * Basic collision testing
+             * Movement
              */
-            if (Game.GetInstance().GetWorld().GetChunkLoaded(newPos))
+            if (input.IsKeyDown(Keys.W))
             {
-                Block? blockHead = Game.GetInstance().GetWorld().GetBlockAt(newPos + player.GetHeight());
-                Block? blockFeet = Game.GetInstance().GetWorld().GetBlockAt(newPos);
-                //both block are null
-                //or
-                //both blocks are water
-                //or either a block is null or water
-                if ((blockHead == null || blockHead.Liquid) && (blockFeet == null || blockFeet.Liquid))
-                {
-                    if (player.IsFalling())
-                    {
-                        Vector3 testPos = newPos - new Vector3(0, 0.1f, 0);
-                        Block? fallingBlock = Game.GetInstance().GetWorld().GetBlockAt(newPos);
-                        if (fallingBlock == null || fallingBlock.Liquid)
-                        {
-                            newPos = testPos;
-                        }
-                    }
-                    player.GetCamera().Position = newPos + player.GetHeight();
-                }
-
+                playerPos += playerFront * player.GetMovementSpeed() * (float)Time;
+            }
+            if (input.IsKeyDown(Keys.S))
+            {
+                playerPos -= (playerFront * player.GetMovementSpeed() * (float)Time);
+            }
+            if (input.IsKeyDown(Keys.A))
+            {
+                playerPos -= (player.GetCamera().Right * player.GetMovementSpeed() * (float)Time);
+            }
+            if (input.IsKeyDown(Keys.D))
+            {
+                playerPos += (player.GetCamera().Right * player.GetMovementSpeed() * (float)Time);
             }
 
+            /**
+             * Jumping and Falling
+             */
+            if (input.IsKeyPressed(Keys.Space))
+            {
+                player.SetJumping(true);
+            }
+
+            if (player.IsJumping())
+            {
+                playerPos.Y += (jumpingSpeed * (float)Time);
+            }
+            else
+            {
+                playerPos.Y -= (jumpingSpeed * (float)Time);
+            }
+
+
+            //Set player position
+            player.GetCamera().Position = CollisionDetecion(playerPos) + player.GetHeight();
+
+            //Debug
             if (input.IsKeyDown(Keys.F3))
             {
                 DebugMenu.Toggle();
@@ -116,6 +132,41 @@ namespace LearnOpenTK
         public void OnMouseWheel(float offset)
         {
             player.OnScrollWheel((int) offset);
+        }
+
+        private Vector3 CollisionDetecion(Vector3 newPos)
+        {           
+            Block? blockHead;
+            Block? blockFeet;            
+            Vector3 playerPos = player.GetPosition();
+            Vector3 finalPos = playerPos;
+
+            Vector3 newPosX = new(newPos.X, playerPos.Y, playerPos.Z);
+            Vector3 newPosY = new(playerPos.X, newPos.Y, playerPos.Z);
+            Vector3 newPosZ = new(playerPos.X, playerPos.Y, newPos.Z);
+
+            blockHead = Game.GetInstance().GetWorld().GetBlockAt(newPosX + player.GetHeight());
+            blockFeet = Game.GetInstance().GetWorld().GetBlockAt(newPosX);
+            if ((blockHead == null || blockHead.Liquid) && (blockFeet == null || blockFeet.Liquid))
+            {
+                finalPos.X = newPos.X;
+            }
+
+            blockHead = Game.GetInstance().GetWorld().GetBlockAt(newPosY + player.GetHeight());
+            blockFeet = Game.GetInstance().GetWorld().GetBlockAt(newPosY);
+            if ((blockHead == null || blockHead.Liquid) && (blockFeet == null || blockFeet.Liquid))
+            {
+                finalPos.Y = newPos.Y;
+            }
+
+            blockHead = Game.GetInstance().GetWorld().GetBlockAt(newPosZ + player.GetHeight());
+            blockFeet = Game.GetInstance().GetWorld().GetBlockAt(newPosZ);
+            if ((blockHead == null || blockHead.Liquid) && (blockFeet == null || blockFeet.Liquid))
+            {
+                finalPos.Z = newPos.Z;
+            }
+
+            return finalPos;
         }
         
     }

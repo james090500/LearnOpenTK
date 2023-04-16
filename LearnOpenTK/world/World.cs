@@ -108,12 +108,12 @@ namespace LearnOpenTK.world
             }
         }
 
-        public void SetBlockAt(Vector3 position, Block block)
+        public void SetBlockAt(Vector3 position, Block? block)
         {
             SetBlockAt((int) position.X, (int) position.Y, (int) position.Z, block);
         }        
 
-        public void SetBlockAt(int x, int y, int z, Block block)
+        public void SetBlockAt(int x, int y, int z, Block? block)
         {
             // Make sure Y is the min height
             if (y < 0) return;
@@ -125,7 +125,7 @@ namespace LearnOpenTK.world
             int blockY = y;
             int blockZ = z - (regionY * Chunk.CHUNK_SIZE);
 
-            Chunk chunk;
+            Chunk? chunk;
             if (activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
             {
                 if (block != null)

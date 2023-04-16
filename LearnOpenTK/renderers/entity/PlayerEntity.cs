@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using System.IO;
 
 namespace LearnOpenTK.renderers.entity
 {
@@ -30,7 +31,7 @@ namespace LearnOpenTK.renderers.entity
 
         public void Render()
         {
-            GL.Disable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.DepthTest);            
 
             Game.GetInstance().GetSpriteShader().Use();
             GL.BindVertexArray(vertexBufferObject);           
