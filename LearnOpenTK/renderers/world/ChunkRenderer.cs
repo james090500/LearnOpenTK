@@ -132,39 +132,37 @@ namespace LearnOpenTK.renderers.world
         private bool ShouldRenderBlock(int x, int y, int z, bool isLiquid = false)
         {
             // Get the block
-            Block block;
+            Block? block;
 
-            // A check to see if the item is out of bounds
-            if (
-                x < 0 || x > Chunk.CHUNK_SIZE - 1 ||
-                y < 0 || y > chunk.blocks.GetLength(1) ||
-                z < 0 || z > Chunk.CHUNK_SIZE - 1)
+            //If Y is out of bounds we know theres nothing in the chunk
+            if (y < 0 || y > chunk.blocks.GetLength(1)) return true;
+
+                // A check to see if the item is out of bounds
+            if (x < 0 || x >= Chunk.CHUNK_SIZE || z < 0 || z >= Chunk.CHUNK_SIZE)
             {
+                int blockX = (chunk.chunkX * Chunk.CHUNK_SIZE) + x;
+                int blockY = y;
+                int blockZ = (chunk.chunkY * Chunk.CHUNK_SIZE) + z;
 
-                //int blockX = 0;
-                //int blockZ = 0;
+                if (x < 0)
+                {
+                    blockX = (chunk.chunkX * Chunk.CHUNK_SIZE) - 1;
+                }
+                else if (x >= Chunk.CHUNK_SIZE)
+                {
+                    blockX = (chunk.chunkX * Chunk.CHUNK_SIZE) + Chunk.CHUNK_SIZE;
+                }
 
-                //if (x < 0)
-                //{
-                //    blockX = (x + Chunk.CHUNK_SIZE) + ((chunk.chunkX - 1) * Chunk.CHUNK_SIZE);
-                //}
-                //else
-                //{
-                //    blockX = (x - Chunk.CHUNK_SIZE) + ((chunk.chunkX + 1) * Chunk.CHUNK_SIZE);
-                //}
+                if (z < 0)
+                {
+                    blockZ = (chunk.chunkY * Chunk.CHUNK_SIZE) - 1;
+                }
+                else if(z >= Chunk.CHUNK_SIZE)
+                {
+                    blockZ = (chunk.chunkY * Chunk.CHUNK_SIZE) + +Chunk.CHUNK_SIZE;
+                }
 
-                //if (z < 0)
-                //{
-                //    blockZ = (z + Chunk.CHUNK_SIZE) + ((chunk.chunkY - 1) * Chunk.CHUNK_SIZE);
-                //}
-                //else
-                //{
-                //    blockZ = (z - Chunk.CHUNK_SIZE) + ((chunk.chunkY + 1) * Chunk.CHUNK_SIZE);
-                //}
-
-                //block = Game.GetInstance().GetWorld().GetBlockAt(blockX, y, blockZ);
-                //The above sort of works, still weird artifacts tho and doesn't block when chunks are being genned
-                return !isLiquid;
+                block = Game.GetInstance().GetWorld().GetBlockAt(blockX, blockY, blockZ);
             }
             else
             {
@@ -207,20 +205,40 @@ namespace LearnOpenTK.renderers.world
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
         }
 
+        public bool IsVisible()
+        {
+            float centerX = (chunk.chunkX * Chunk.CHUNK_SIZE) + (Chunk.CHUNK_SIZE / 2);
+            float centerY = (chunk.chunkY * Chunk.CHUNK_SIZE) + (Chunk.CHUNK_SIZE / 2);
+
+            float sizeY = chunk.blocks.GetLength(1);
+
+            Vector3 chunkCenter = new Vector3(centerX, sizeY / 2, centerY);
+            Vector3 chunkSize = new Vector3(Chunk.CHUNK_SIZE, sizeY, Chunk.CHUNK_SIZE);
+
+            return Game.GetInstance().GetPlayer().GetCamera().Frustum.CubeInFrustum(chunkCenter, chunkSize);
+        }
+
         public void Render()
         {
-            Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(chunk.GetPosition()));
+            if(IsVisible())
+            {
+                Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(chunk.GetPosition()));
 
-            GL.BindVertexArray(blockVAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, blockMesh.getTriangleCount());
+                GL.BindVertexArray(blockVAO);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, blockMesh.getTriangleCount());
+            }
+
         }
 
         public void RenderLiquid()
         {
-            Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(chunk.GetPosition()));
+            if (IsVisible())
+            {
+                Game.GetInstance().GetShader().SetMatrix4("model", Matrix4.CreateTranslation(chunk.GetPosition()));
 
-            GL.BindVertexArray(liquidVAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, liquidMesh.getTriangleCount());
+                GL.BindVertexArray(liquidVAO);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, liquidMesh.getTriangleCount());
+            }
         }
 
         public void Unload()

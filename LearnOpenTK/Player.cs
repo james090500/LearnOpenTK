@@ -18,6 +18,8 @@ namespace LearnOpenTK
         private bool sprinting = false;
         private Vector3 beforeJump;
 
+        public bool NoClip = false;
+
         public Player()
         {
             camera = new Camera(new Vector3(0, 67, 0), Game.GetInstance().Size.X / (float)Game.GetInstance().Size.Y);

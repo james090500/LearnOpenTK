@@ -5,11 +5,13 @@ namespace LearnOpenTK.world
 {
     public class World
     {
-        private float viewDistance = 6.0f;
+        private float viewDistance = 16.0f;
         private Vector2 knownCenter;
 
-        private Dictionary<Vector2, Chunk> activeChuks = new Dictionary<Vector2, Chunk>();
+        private Dictionary<Vector2, Chunk> activeChunks = new Dictionary<Vector2, Chunk>();
         private Dictionary<Vector2, Chunk> newChunks = new Dictionary<Vector2, Chunk>();
+
+        public int Seed { get; } = (int)DateTimeOffset.Now.ToUnixTimeSeconds();
 
         public void GetChunksToRender()
         {
@@ -17,10 +19,10 @@ namespace LearnOpenTK.world
             int regionY = (int)Math.Floor((double)Game.GetInstance().GetPlayer().GetPosition().Z / Chunk.CHUNK_SIZE);
             Vector2 centerVec = new Vector2(regionX, regionY);
 
-            if (activeChuks.Count > 0 && knownCenter.Equals(centerVec)) return;
+            if (activeChunks.Count > 0 && knownCenter.Equals(centerVec)) return;
             knownCenter = centerVec;
 
-            List<Vector2> viewableVectors = new List<Vector2>();
+            HashSet<Vector2> viewableVectors = new HashSet<Vector2>();
             for (float x = centerVec.X - viewDistance; x <= centerVec.X + viewDistance; x++)
             {
                 for (float y = centerVec.Y - viewDistance; y <= centerVec.Y + viewDistance; y++)
@@ -29,7 +31,8 @@ namespace LearnOpenTK.world
                     if (Vector2.Distance(centerVec, vector) <= viewDistance)
                     {
                         viewableVectors.Add(vector);
-                        if (!activeChuks.ContainsKey(vector) && !newChunks.ContainsKey(vector))
+
+                        if (!activeChunks.ContainsKey(vector) && !newChunks.ContainsKey(vector))
                         {
                             Chunk chunk = new Chunk((int)x, (int)y);
                             newChunks.Add(vector, chunk);
@@ -38,14 +41,25 @@ namespace LearnOpenTK.world
                 }
             }
 
-            foreach (KeyValuePair<Vector2, Chunk> chunk in activeChuks)
+            // Add all chunks to active if first render
+            if(activeChunks.Count == 0)
+            {
+                activeChunks = new Dictionary<Vector2, Chunk>(newChunks);
+                foreach (KeyValuePair<Vector2, Chunk> chunk in activeChunks)
+                {
+                    chunk.Value.getChunkRenderer().GenerateMesh();
+                }
+                newChunks.Clear();
+            }
+
+            foreach (KeyValuePair<Vector2, Chunk> chunk in activeChunks.ToList())
             {
                 //if vector not in viewableVectors - remove chunk
                 Vector2 chunkVector = new Vector2(chunk.Value.chunkX, chunk.Value.chunkY);
                 if (!viewableVectors.Contains(chunkVector))
                 {
-                    activeChuks[chunkVector].getChunkRenderer().Unload();
-                    activeChuks.Remove(chunkVector);
+                    activeChunks[chunkVector].getChunkRenderer().Unload();
+                    activeChunks.Remove(chunkVector);
                 }
             }
         }
@@ -59,18 +73,18 @@ namespace LearnOpenTK.world
             {
                 KeyValuePair<Vector2, Chunk> chunk = newChunks.First();
                 chunk.Value.getChunkRenderer().GenerateMesh();
-                activeChuks.Add(chunk.Key, chunk.Value);
+                activeChunks.Add(chunk.Key, chunk.Value);
                 newChunks.Remove(chunk.Key);
             }
 
             //Render all chunks
-            foreach (KeyValuePair<Vector2, Chunk> chunk in activeChuks)
+            foreach (KeyValuePair<Vector2, Chunk> chunk in activeChunks)
             {
                 chunk.Value.getChunkRenderer().Render();
             }
 
             //Render the transparent water next
-            foreach (KeyValuePair<Vector2, Chunk> chunk in activeChuks)
+            foreach (KeyValuePair<Vector2, Chunk> chunk in activeChunks)
             {
                 chunk.Value.getChunkRenderer().RenderLiquid();
             }
@@ -90,7 +104,7 @@ namespace LearnOpenTK.world
             int regionY = (int)Math.Floor(z / Chunk.CHUNK_SIZE);
 
             Chunk chunk;
-            if(!activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
+            if(!activeChunks.TryGetValue(new Vector2(regionX, regionY), out chunk))
             {
                 return null;
             }
@@ -99,7 +113,7 @@ namespace LearnOpenTK.world
             int blockY = (int) Math.Floor(y);
             int blockZ = (int) Math.Floor(z - (regionY * Chunk.CHUNK_SIZE));
 
-            if(blockX >= Chunk.CHUNK_SIZE || blockY >= chunk.blocks.GetLength(1) || blockZ >= Chunk.CHUNK_SIZE)
+            if(blockX >= Chunk.CHUNK_SIZE || blockY > chunk.blocks.GetLength(1) || blockZ >= Chunk.CHUNK_SIZE)
             {
                 return null;
             } else
@@ -126,7 +140,7 @@ namespace LearnOpenTK.world
             int blockZ = z - (regionY * Chunk.CHUNK_SIZE);
 
             Chunk? chunk;
-            if (activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
+            if (activeChunks.TryGetValue(new Vector2(regionX, regionY), out chunk))
             {
                 if (block != null)
                 {
@@ -140,19 +154,33 @@ namespace LearnOpenTK.world
 
         public bool GetChunkLoaded(Vector3 position)
         {
+            Chunk? chunk = GetChunkAt(position);
+            if (chunk == null) return false;
+
+            return chunk.blocks.Length > 0;
+        }
+
+        public Chunk? GetChunkAt(Vector3 position)
+        {
+            return GetChunkAt((int)position.X, (int)position.Y, (int)position.Z);
+        }
+
+        public Chunk? GetChunkAt(int x, int y, int z)
+        {
             // Make sure Y is the min height
-            if (position.Y < 0) return false;
+            if (y < 0) return null;
 
-            int regionX = (int)Math.Floor((double) position.X / Chunk.CHUNK_SIZE);
-            int regionY = (int)Math.Floor((double) position.Z / Chunk.CHUNK_SIZE);
+            int regionX = (int)Math.Floor((double)x / Chunk.CHUNK_SIZE);
+            int regionY = (int)Math.Floor((double)z / Chunk.CHUNK_SIZE);
 
-            Chunk chunk;
-            if (!activeChuks.TryGetValue(new Vector2(regionX, regionY), out chunk))
+            Chunk? chunk;
+            if (!activeChunks.TryGetValue(new Vector2(regionX, regionY), out chunk))
             {
-                return false;
-            } else
+                return null;
+            }
+            else
             {
-                return chunk.blocks.Length > 0;
+                return chunk;
             }
         }
     }

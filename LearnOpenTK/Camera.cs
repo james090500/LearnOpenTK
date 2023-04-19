@@ -39,6 +39,9 @@ namespace LearnOpenTK
         // This is simply the aspect ratio of the viewport, used for the projection matrix.
         public float AspectRatio { private get; set; }
 
+        // The camera frutsum for culling
+        public Frustum Frustum { get; } = new Frustum();
+
         public Vector3 Front => _front;
 
         public Vector3 Up => _up;
@@ -94,7 +97,7 @@ namespace LearnOpenTK
         // Get the projection matrix using the same method we have used up until this point
         public Matrix4 GetProjectionMatrix()
         {
-            return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
+            return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 200f);
         }
 
         // This function is going to update the direction vertices using some of the math learned in the web tutorials.

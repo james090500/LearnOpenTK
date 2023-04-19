@@ -83,7 +83,7 @@ namespace LearnOpenTK
             {
                 playerPos.Y += (jumpingSpeed * (float)Time);
             }
-            else
+            else if(!player.NoClip) 
             {
                 playerPos.Y -= (jumpingSpeed * (float)Time);
             }
@@ -93,9 +93,14 @@ namespace LearnOpenTK
             player.GetCamera().Position = CollisionDetecion(playerPos) + player.GetHeight();
 
             //Debug
-            if (input.IsKeyDown(Keys.F3))
+            if (input.IsKeyPressed(Keys.F3))
             {
                 DebugMenu.Toggle();
+            }
+
+            if(input.IsKeyPressed(Keys.V))
+            {
+                player.NoClip = !player.NoClip;
             }
         }
 
@@ -127,6 +132,8 @@ namespace LearnOpenTK
             {
                 player.OnRightClick();
             }
+
+            player.GetCamera().Frustum.Generate();
         }
 
         public void OnMouseWheel(float offset)
@@ -135,7 +142,9 @@ namespace LearnOpenTK
         }
 
         private Vector3 CollisionDetecion(Vector3 newPos)
-        {           
+        {
+            if (player.NoClip) return newPos;
+
             Block? blockHead;
             Block? blockFeet;            
             Vector3 playerPos = player.GetPosition();

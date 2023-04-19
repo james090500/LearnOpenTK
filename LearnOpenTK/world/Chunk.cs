@@ -11,7 +11,7 @@ namespace LearnOpenTK.world
         public static readonly int CHUNK_SIZE = 16;
         public int waterHeight = 64;
         public Block[,,] blocks = new Block[16, 100, 16];
-        FastNoiseLite noise = new FastNoiseLite();
+        FastNoiseLite noise = new FastNoiseLite(Game.GetInstance().GetWorld().Seed);
         private ChunkRenderer chunkRenderer;
 
         public Chunk(int x, int z)
@@ -25,8 +25,8 @@ namespace LearnOpenTK.world
 
         private void GenerateWorld()
         {
-            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-            noise.SetFrequency(0.02f);
+            noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+            noise.SetFrequency(0.03f);
 
             //Generate blocks
             for (int x = 0; x < CHUNK_SIZE; x++)
