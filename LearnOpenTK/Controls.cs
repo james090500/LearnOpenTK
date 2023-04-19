@@ -1,9 +1,7 @@
 ﻿using LearnOpenTK.blocks;
 using LearnOpenTK.utils;
-using OpenTK.Graphics.ES20;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Linq.Expressions;
 
 namespace LearnOpenTK
 {
@@ -81,13 +79,23 @@ namespace LearnOpenTK
 
             if (player.IsJumping())
             {
-                playerPos.Y += (jumpingSpeed * (float)Time);
+                float newPosY = playerPos.Y + (jumpingSpeed * (float)Time);
+                Vector3 newPos = new(player.GetPosition().X, newPosY, player.GetPosition().Z);
+                Block? block = Game.GetInstance().GetWorld().GetBlockAt(newPos + player.GetHeight());
+                if(block != null)
+                {
+                    player.SetJumping(false);                    
+                }
+                else
+                {
+                    playerPos.Y = newPosY;
+                }
             }
-            else if(!player.NoClip) 
+            
+            if(player.IsFalling() && !player.NoClip) 
             {
                 playerPos.Y -= (jumpingSpeed * (float)Time);
             }
-
 
             //Set player position
             player.GetCamera().Position = CollisionDetecion(playerPos) + player.GetHeight();

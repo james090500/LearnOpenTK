@@ -31,6 +31,7 @@ namespace LearnOpenTK
             {
                 string infoLog = GL.GetShaderInfoLog(VertexShader);
                 Console.WriteLine(infoLog);
+                Game.GetInstance().Close();
             }
 
             GL.CompileShader(FragmentShader);
@@ -39,6 +40,7 @@ namespace LearnOpenTK
             {
                 string infoLog = GL.GetShaderInfoLog(FragmentShader);
                 Console.WriteLine(infoLog);
+                Game.GetInstance().Close();
             }
 
             //Link shaders together to run on the gpu. This is the actual "Shader" in OpenGL

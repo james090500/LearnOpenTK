@@ -1,4 +1,5 @@
 ﻿using LearnOpenTK.textures;
+using LearnOpenTK.utils;
 using LearnOpenTK.world;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -19,8 +20,9 @@ namespace LearnOpenTK
         private readonly World World;
         private readonly Player Player;
         private readonly Controls Controls;
+        private readonly Queue queue = new Queue();
 
-        Stopwatch stopwatch = new Stopwatch();
+        Stopwatch stopwatch = new Stopwatch();        
         int framesPerSecond = 0;
 
         public Game(string title, int width, int height) : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -55,9 +57,7 @@ namespace LearnOpenTK
          */
         protected override void OnLoad()
         {
-            base.OnLoad();
-
-            CursorState = CursorState.Grabbed;
+            base.OnLoad();            
 
             GL.ClearColor(Color4.SkyBlue);
             GL.Enable(EnableCap.DepthTest);
@@ -72,6 +72,7 @@ namespace LearnOpenTK
 
             //Make window visible
             this.IsVisible = true;
+            CursorState = CursorState.Grabbed;
         }
 
         protected override void OnUnload()
@@ -89,6 +90,13 @@ namespace LearnOpenTK
 
             //Load the shader
             Shader.Use();
+
+            //Do Jobs
+            Action? action = queue.GetActions().FirstOrDefault();
+            if (action != null) {
+                action.Invoke();
+                queue.RemoveAction(action);
+            }
 
             // Render the world
             World.Render();
@@ -131,34 +139,12 @@ namespace LearnOpenTK
             GL.Viewport(0, 0, e.Width, e.Height); //Just used to resize the viewport which is what we render to
         }
 
-        public static Game GetInstance()
-        {
-            return Instance;
-        }
-
-        public Shader GetShader()
-        {
-            return Shader;
-        }
-
-        public Shader GetSpriteShader()
-        {
-            return SpriteShader;
-        }
-
-        public TextureManager GetTextureManager()
-        {
-            return TextureManager;
-        }
-
-        public World GetWorld()
-        {
-            return World;
-        }
-
-        public Player GetPlayer()
-        {
-            return Player;
-        }
+        public static Game GetInstance() { return Instance; }
+        public Shader GetShader() { return Shader; }
+        public Shader GetSpriteShader() { return SpriteShader; }
+        public TextureManager GetTextureManager() { return TextureManager; }
+        public World GetWorld() { return World; }
+        public Player GetPlayer() { return Player; }
+        public Queue GetQueue() { return queue; }
     }
 }

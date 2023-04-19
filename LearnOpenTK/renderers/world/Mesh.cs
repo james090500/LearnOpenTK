@@ -9,27 +9,26 @@
         public void Update(float[] temp_vertices, int x, int y, int z, int texturePosition)
         {
             int baseIndex = vertices.Count;
-            for (int i = 0; i < temp_vertices.Length / 5; i++)
+            for (int i = 0; i < temp_vertices.Length / 6; i++)
             {
-                vertices.Add(temp_vertices[0 + i * 5] + x);
-                vertices.Add(temp_vertices[1 + i * 5] + y);
-                vertices.Add(temp_vertices[2 + i * 5] + z);
+                //Position
+                vertices.Add(temp_vertices[0 + i * 6] + x);
+                vertices.Add(temp_vertices[1 + i * 6] + y);
+                vertices.Add(temp_vertices[2 + i * 6] + z);
 
-
+                //Textures
                 //OpenGL DOESN'T start at 0,0. It reads images like a graph so it's starts at 0,1. 
                 //This means if textures are at the top of the image, i need to read from the bottom
                 //Left first!
                 float texSize = 1 / (float)8;
-                vertices.Add(temp_vertices[3 + i * 5] == 0 ? texSize * texturePosition : texSize * texturePosition + texSize);
-                vertices.Add(temp_vertices[4 + i * 5] == 0 ? texSize * 7 : 1);
-            }
-            //0, 0
-            //0.125, 0
-            //0.125, 0.125
-            //0.125, 0.125
-            //0, 0.125
-            //0, 0
+                vertices.Add(temp_vertices[3 + i * 6] == 0 ? texSize * texturePosition : texSize * texturePosition + texSize);
+                vertices.Add(temp_vertices[4 + i * 6] == 0 ? texSize * 7 : 1);
 
+                //Light
+                vertices.Add(temp_vertices[5 + i * 6]);
+            }
+
+            //Indicies
             indices.Add(baseIndex + 0);
             indices.Add(baseIndex + 1);
             indices.Add(baseIndex + 3);

@@ -1,5 +1,7 @@
 ﻿using LearnOpenTK.blocks;
+using LearnOpenTK.utils;
 using OpenTK.Mathematics;
+using System.Security.Cryptography.X509Certificates;
 
 namespace LearnOpenTK.world
 {
@@ -66,6 +68,8 @@ namespace LearnOpenTK.world
 
         public void Render()
         {
+            Game.GetInstance().GetShader().SetFloat("aWorldLight", 1.0f);
+
             GetChunksToRender();
 
             // Generate 1 Chunk mesh per frame
@@ -148,7 +152,45 @@ namespace LearnOpenTK.world
                 }
 
                 chunk.blocks[blockX, blockY, blockZ] = block;
+
                 chunk.getChunkRenderer().GenerateMesh();
+            }
+
+            //Also make sure to re-render other chunk borderes
+            if (blockX == 0 || blockX == 15)
+            {
+                int offsetRegionX = regionX;
+                if (blockX == 0)
+                {
+                    offsetRegionX -= 1;
+                }
+                else if (blockX == 15)
+                {
+                    offsetRegionX += 1;
+                }
+
+                if (activeChunks.TryGetValue(new Vector2(offsetRegionX, regionY), out chunk))
+                {
+                    Game.GetInstance().GetQueue().AddAction(() => chunk.getChunkRenderer().GenerateMesh());
+                }
+            }
+
+            if (blockZ == 0 || blockZ == 15)
+            {
+                int offsetRegionY = regionY;
+                if (blockZ == 0)
+                {
+                    offsetRegionY -= 1;
+                }
+                else if (blockZ == 15)
+                {
+                    offsetRegionY += 1;
+                }
+
+                if (activeChunks.TryGetValue(new Vector2(regionX, offsetRegionY), out chunk))
+                {
+                    Game.GetInstance().GetQueue().AddAction(() => chunk.getChunkRenderer().GenerateMesh());
+                }
             }
         }
 

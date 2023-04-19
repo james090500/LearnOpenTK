@@ -31,7 +31,7 @@ namespace LearnOpenTK
 
         public void OnLeftClick()
         {
-            Block? block = GetLookingAt();
+            Block? block = GetLookingAt(false);
             if(block != null && block.Breakable)
             {
                 Game.GetInstance().GetWorld().SetBlockAt(block.Position, null);
@@ -52,7 +52,7 @@ namespace LearnOpenTK
                 Vector3 checkBlockPos = new Vector3(checkBlockX, checkBlockY, checkBlockZ);
 
                 Block? block = Game.GetInstance().GetWorld().GetBlockAt(checkBlockPos);
-                if (block != null)
+                if (block != null && !block.Liquid)
                 {
                     float placeBlockX = (int)Math.Floor(GetCamera().Position.X + (GetCamera().Front.X * (looped - 0.5f)));
                     float placeBlockY = (int)Math.Floor(GetCamera().Position.Y + (GetCamera().Front.Y * (looped - 0.5f)));
@@ -90,7 +90,7 @@ namespace LearnOpenTK
             }
         }
 
-        public Block? GetLookingAt()
+        public Block? GetLookingAt(bool includeLiquids = false)
         {
             float looped = 0.0f;
             float distance = 5.0f;
@@ -105,7 +105,7 @@ namespace LearnOpenTK
                 Vector3 blockPos = new Vector3(blockX, blockY, blockZ);
 
                 Block? block = Game.GetInstance().GetWorld().GetBlockAt(blockPos);
-                if (block != null)
+                if (block != null && block.Liquid == includeLiquids)
                 {
                     return block;
                 }
@@ -118,6 +118,19 @@ namespace LearnOpenTK
 
         public bool IsFalling()
         {
+            float blockAtY = (int) Math.Floor(GetPosition().Y);
+            float playerPosY = GetPosition().Y;
+            Block? block = Game.GetInstance().GetWorld().GetBlockAt(new(GetPosition().X, blockAtY - 1, GetPosition().Z));
+
+            if ((playerPosY - blockAtY >= 0.01) || block == null)
+            {
+                falling = true;
+            } 
+            else
+            {
+                falling = false;
+            }
+
             return falling && !jumping;
         }
 
@@ -129,7 +142,7 @@ namespace LearnOpenTK
         public bool IsJumping()
         {
             if (jumping && GetPosition().Y < beforeJump.Y + 1.4f)
-            {
+            {                
                 return true;
             }
             else
@@ -140,12 +153,9 @@ namespace LearnOpenTK
         }
 
         public void SetJumping(bool jumping)
-        {
-            if (!this.jumping && !IsFalling())
-            {
-                this.beforeJump = GetPosition();
-                this.jumping = jumping;
-            }
+        {            
+            this.beforeJump = GetPosition();
+            this.jumping = jumping;            
         }
 
         public void SetSneaking(bool sneaking)
@@ -187,16 +197,7 @@ namespace LearnOpenTK
 
         public Vector3 GetHeight()
         {
-            return new Vector3(0, 1.8f, 0);
-
-            if (sneaking)
-            {
-                return new Vector3(0, 1.4f, 0);
-            }
-            else
-            {
-                return new Vector3(0, 1.8f, 0);
-            }            
+            return new Vector3(0, 1.8f, 0);           
         }
 
         //public void GetCompass()

@@ -135,7 +135,7 @@ namespace LearnOpenTK.renderers.world
             Block? block;
 
             //If Y is out of bounds we know theres nothing in the chunk
-            if (y < 0 || y > chunk.blocks.GetLength(1)) return true;
+            if (y <= 0 || y > chunk.blocks.GetLength(1)) return false;
 
                 // A check to see if the item is out of bounds
             if (x < 0 || x >= Chunk.CHUNK_SIZE || z < 0 || z >= Chunk.CHUNK_SIZE)
@@ -198,11 +198,15 @@ namespace LearnOpenTK.renderers.world
 
             int vertexLocation = Game.GetInstance().GetShader().GetAttribLocation("aPosition");
             GL.EnableVertexAttribArray(vertexLocation); //Enable the index
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
 
             int texCoordLocation = Game.GetInstance().GetShader().GetAttribLocation("aTexCoord");
             GL.EnableVertexAttribArray(texCoordLocation); //Enable the index
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+
+            int lightLocation = Game.GetInstance().GetShader().GetAttribLocation("aLightValue");
+            GL.EnableVertexAttribArray(lightLocation);
+            GL.VertexAttribPointer(lightLocation, 1, VertexAttribPointerType.Float, false, 6 * sizeof(float), 5 * sizeof(float));
         }
 
         public bool IsVisible()

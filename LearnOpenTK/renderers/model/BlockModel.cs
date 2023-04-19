@@ -6,58 +6,68 @@ namespace LearnOpenTK.renderers.model
     {
         static readonly float[] left_vertices =
         {
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            // Position       // Texture  // Light
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.8f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.8f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.8f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.8f,
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.8f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.8f,
         };
 
         static readonly float[] right_vertices =
         {
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            // Position       // Texture  // Light
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.8f,
+            1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.8f,
+            1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.8f,
+            1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.8f,
+            0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.8f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.8f,
         };
 
-        static readonly float[] back_vertices = {
-            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        static readonly float[] back_vertices = 
+        {
+            // Position       // Texture  // Light
+            0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.8f,
+            0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.8f,
+            0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.8f,
+            0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.8f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.8f,
+            0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.8f,
         };
 
-        static readonly float[] front_vertices = {
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        static readonly float[] front_vertices = 
+        {
+            // Position       // Texture  // Light
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.8f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.8f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.8f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.8f,
+            1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.8f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.8f,
         };
 
-        static readonly float[] bottom_vertices = {
-            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        static readonly float[] bottom_vertices = 
+        {
+            // Position       // Texture  // Light
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f,
+            1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f,
+            1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.5f,
+            1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.5f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f,
         };
 
-        static readonly float[] top_vertices = {
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f
+        static readonly float[] top_vertices = 
+        {
+            // Position       // Texture  // Light
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         };
 
         public override float[] GetFace(Face face)
