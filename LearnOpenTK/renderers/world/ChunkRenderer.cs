@@ -32,44 +32,45 @@ namespace LearnOpenTK.renderers.world
         {
             //Generate mesh            
             blockMesh = new Mesh();
-            for (int x = 0; x < chunk.blocks.GetLength(0); x++)
+            for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
             {
-                for (int y = 0; y < chunk.blocks.GetLength(1); y++)
+                for (int y = 0; y < chunk.GetBlocks().Count; y++)
                 {
-                    for (int z = 0; z < chunk.blocks.GetLength(2); z++)
+                    for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
                     {
-                        if (chunk.blocks[x, y, z] == null || chunk.blocks[x, y, z].Liquid) continue;
+                        Block? block = chunk.GetBlock(x, y, z);
+                        if (block == null || block.Liquid) continue;
 
                         Model model = GetBlockModel();
 
                         //X Left and Right
                         if (ShouldRenderBlock(x - 1, y, z))
                         {
-                            blockMesh.Update(model.GetFace(Face.BACK), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.BACK));
+                            blockMesh.Update(model.GetFace(Face.BACK), x, y, z, block.GetTexturePosition(Face.BACK));
                         }
                         if (ShouldRenderBlock(x + 1, y, z))
                         {
-                            blockMesh.Update(model.GetFace(Face.FRONT), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.FRONT));
+                            blockMesh.Update(model.GetFace(Face.FRONT), x, y, z, block.GetTexturePosition(Face.FRONT));
                         }
 
                         //Y Up and Down
                         if (ShouldRenderBlock(x, y - 1, z))
                         {
-                            blockMesh.Update(model.GetFace(Face.BOTTOM), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.BOTTOM));
+                            blockMesh.Update(model.GetFace(Face.BOTTOM), x, y, z, block.GetTexturePosition(Face.BOTTOM));
                         }
                         if (ShouldRenderBlock(x, y + 1, z))
                         {
-                            blockMesh.Update(model.GetFace(Face.TOP), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.TOP));
+                            blockMesh.Update(model.GetFace(Face.TOP), x, y, z, block.GetTexturePosition(Face.TOP));
                         }
 
                         //Z Forward and Back
                         if (ShouldRenderBlock(x, y, z - 1))
                         {
-                            blockMesh.Update(model.GetFace(Face.LEFT), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.LEFT));
+                            blockMesh.Update(model.GetFace(Face.LEFT), x, y, z, block.GetTexturePosition(Face.LEFT));
                         }
                         if (ShouldRenderBlock(x, y, z + 1))
                         {
-                            blockMesh.Update(model.GetFace(Face.RIGHT), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.RIGHT));
+                            blockMesh.Update(model.GetFace(Face.RIGHT), x, y, z, block.GetTexturePosition(Face.RIGHT));
                         }
                     }
                 }
@@ -83,44 +84,45 @@ namespace LearnOpenTK.renderers.world
         {
             //Generate mesh            
             liquidMesh = new Mesh();
-            for (int x = 0; x < chunk.blocks.GetLength(0); x++)
+            for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
             {
-                for (int y = 0; y < chunk.blocks.GetLength(1); y++)
+                for (int y = 0; y < chunk.GetBlocks().Count; y++)
                 {
-                    for (int z = 0; z < chunk.blocks.GetLength(2); z++)
+                    for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
                     {
-                        if (chunk.blocks[x, y, z] == null || !chunk.blocks[x, y, z].Liquid) continue;
+                        Block? block = chunk.GetBlock(x, y, z);
+                        if (block == null || !block.Liquid) continue;
 
                         Model model = GetLiquidModel();
 
                         //X Left and Right
                         if (ShouldRenderBlock(x - 1, y, z, true))
                         {
-                            liquidMesh.Update(model.GetFace(Face.BACK), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.BACK));
+                            liquidMesh.Update(model.GetFace(Face.BACK), x, y, z, block.GetTexturePosition(Face.BACK));
                         }
                         if (ShouldRenderBlock(x + 1, y, z, true))
                         {
-                            liquidMesh.Update(model.GetFace(Face.FRONT), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.FRONT));
+                            liquidMesh.Update(model.GetFace(Face.FRONT), x, y, z, block.GetTexturePosition(Face.FRONT));
                         }
 
                         //Y Up and Down
                         if (ShouldRenderBlock(x, y - 1, z, true))
                         {
-                            liquidMesh.Update(model.GetFace(Face.BOTTOM), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.BOTTOM));
+                            liquidMesh.Update(model.GetFace(Face.BOTTOM), x, y, z, block.GetTexturePosition(Face.BOTTOM));
                         }
                         if (ShouldRenderBlock(x, y + 1, z, true))
                         {
-                            liquidMesh.Update(model.GetFace(Face.TOP), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.TOP));
+                            liquidMesh.Update(model.GetFace(Face.TOP), x, y, z, block.GetTexturePosition(Face.TOP));
                         }
 
                         //Z Forward and Back
                         if (ShouldRenderBlock(x, y, z - 1, true))
                         {
-                            liquidMesh.Update(model.GetFace(Face.LEFT), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.LEFT));
+                            liquidMesh.Update(model.GetFace(Face.LEFT), x, y, z, block.GetTexturePosition(Face.LEFT));
                         }
                         if (ShouldRenderBlock(x, y, z + 1, true))
                         {
-                            liquidMesh.Update(model.GetFace(Face.RIGHT), x, y, z, chunk.blocks[x, y, z].GetTexturePosition(Face.RIGHT));
+                            liquidMesh.Update(model.GetFace(Face.RIGHT), x, y, z, block.GetTexturePosition(Face.RIGHT));
                         }
                     }
                 }
@@ -135,7 +137,7 @@ namespace LearnOpenTK.renderers.world
             Block? block;
 
             //If Y is out of bounds we know theres nothing in the chunk
-            if (y <= 0 || y > chunk.blocks.GetLength(1)) return false;
+            if (y <= 0 || y > chunk.GetBlocks().Count) return false;
 
                 // A check to see if the item is out of bounds
             if (x < 0 || x >= Chunk.CHUNK_SIZE || z < 0 || z >= Chunk.CHUNK_SIZE)
@@ -166,7 +168,7 @@ namespace LearnOpenTK.renderers.world
             }
             else
             {
-                block = chunk.blocks[x, y, z];
+                block = chunk.GetBlock(x, y, z);
             }
 
             // If no block, render it
@@ -214,7 +216,7 @@ namespace LearnOpenTK.renderers.world
             float centerX = (chunk.chunkX * Chunk.CHUNK_SIZE) + (Chunk.CHUNK_SIZE / 2);
             float centerY = (chunk.chunkY * Chunk.CHUNK_SIZE) + (Chunk.CHUNK_SIZE / 2);
 
-            float sizeY = chunk.blocks.GetLength(1);
+            float sizeY = chunk.GetBlocks().Count;
 
             Vector3 chunkCenter = new Vector3(centerX, sizeY / 2, centerY);
             Vector3 chunkSize = new Vector3(Chunk.CHUNK_SIZE, sizeY, Chunk.CHUNK_SIZE);

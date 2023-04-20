@@ -1,7 +1,5 @@
 ﻿using LearnOpenTK.blocks;
-using LearnOpenTK.utils;
 using OpenTK.Mathematics;
-using System.Security.Cryptography.X509Certificates;
 
 namespace LearnOpenTK.world
 {
@@ -117,12 +115,13 @@ namespace LearnOpenTK.world
             int blockY = (int) Math.Floor(y);
             int blockZ = (int) Math.Floor(z - (regionY * Chunk.CHUNK_SIZE));
 
-            if(blockX >= Chunk.CHUNK_SIZE || blockY > chunk.blocks.GetLength(1) || blockZ >= Chunk.CHUNK_SIZE)
+            if(blockX >= Chunk.CHUNK_SIZE || blockY > chunk.GetBlocks().Count || blockZ >= Chunk.CHUNK_SIZE)
             {
                 return null;
-            } else
+            } 
+            else
             {
-                return chunk.blocks[blockX, blockY, blockZ];
+                return chunk.GetBlock(blockX, blockY, blockZ);
             }
         }
 
@@ -151,7 +150,7 @@ namespace LearnOpenTK.world
                     block.Position = new Vector3(x, y, z);
                 }
 
-                chunk.blocks[blockX, blockY, blockZ] = block;
+                chunk.SetBlock(blockX, blockY, blockZ, block);
 
                 chunk.getChunkRenderer().GenerateMesh();
             }
@@ -199,7 +198,7 @@ namespace LearnOpenTK.world
             Chunk? chunk = GetChunkAt(position);
             if (chunk == null) return false;
 
-            return chunk.blocks.Length > 0;
+            return chunk.GetBlocks().Count > 0;
         }
 
         public Chunk? GetChunkAt(Vector3 position)

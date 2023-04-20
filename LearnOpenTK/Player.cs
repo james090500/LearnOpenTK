@@ -122,7 +122,7 @@ namespace LearnOpenTK
             float playerPosY = GetPosition().Y;
             Block? block = Game.GetInstance().GetWorld().GetBlockAt(new(GetPosition().X, blockAtY - 1, GetPosition().Z));
 
-            if ((playerPosY - blockAtY >= 0.01) || block == null)
+            if ((playerPosY - blockAtY >= 0.02) || block == null || (block != null && block.Liquid))
             {
                 falling = true;
             } 
@@ -141,7 +141,7 @@ namespace LearnOpenTK
 
         public bool IsJumping()
         {
-            if (jumping && GetPosition().Y < beforeJump.Y + 1.4f)
+            if (this.jumping && GetPosition().Y < beforeJump.Y + 1.4f)
             {                
                 return true;
             }
@@ -152,10 +152,10 @@ namespace LearnOpenTK
             }
         }
 
-        public void SetJumping(bool jumping)
-        {            
+        public void SetJumping(bool setJump)
+        {
             this.beforeJump = GetPosition();
-            this.jumping = jumping;            
+            jumping = setJump;
         }
 
         public void SetSneaking(bool sneaking)
@@ -178,11 +178,18 @@ namespace LearnOpenTK
             return sprinting;
         }
 
+        public bool IsSwimming()
+        {
+            Block? blockHead = Game.GetInstance().GetWorld().GetBlockAt(GetPosition() + GetHeight());
+            Block? blockFeet = Game.GetInstance().GetWorld().GetBlockAt(GetPosition());
+            return (blockHead != null && blockHead.Liquid) && (blockFeet != null && blockFeet.Liquid);
+        }
+
         public float GetMovementSpeed()
         {
             float movementSpeed = 4f; 
 
-            if(sprinting)
+            if(IsSprinting() && !IsSwimming())
             {
                 movementSpeed += 2f;
             }

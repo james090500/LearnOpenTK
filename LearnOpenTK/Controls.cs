@@ -72,7 +72,7 @@ namespace LearnOpenTK
             /**
              * Jumping and Falling
              */
-            if (input.IsKeyPressed(Keys.Space))
+            if (input.IsKeyDown(Keys.Space) && (player.IsSwimming() || !player.IsJumping() && !player.IsFalling()))
             {
                 player.SetJumping(true);
             }
@@ -82,7 +82,7 @@ namespace LearnOpenTK
                 float newPosY = playerPos.Y + (jumpingSpeed * (float)Time);
                 Vector3 newPos = new(player.GetPosition().X, newPosY, player.GetPosition().Z);
                 Block? block = Game.GetInstance().GetWorld().GetBlockAt(newPos + player.GetHeight());
-                if(block != null)
+                if(block != null && !block.Liquid)
                 {
                     player.SetJumping(false);                    
                 }
