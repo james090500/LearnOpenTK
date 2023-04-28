@@ -1,4 +1,5 @@
-﻿using LearnOpenTK.textures;
+﻿using LearnOpenTK.blocks;
+using LearnOpenTK.textures;
 using LearnOpenTK.utils;
 using LearnOpenTK.world;
 using OpenTK.Graphics.OpenGL;
@@ -17,6 +18,7 @@ namespace LearnOpenTK
         private Shader Shader;
         private Shader SpriteShader;
         private TextureManager TextureManager = new TextureManager();
+        private readonly Blocks Blocks;
         private readonly World World;
         private readonly Player Player;
         private readonly Controls Controls;
@@ -41,6 +43,10 @@ namespace LearnOpenTK
             Shader = new Shader("shaders/shader.vert", "shaders/shader.frag");
             SpriteShader = new Shader("shaders/2dshader.vert", "shaders/2dshader.frag");
            
+            // Get all blocks
+            Blocks = new Blocks();
+            Blocks.Init();
+
             // Generate World
             World = new World();
 
@@ -143,6 +149,7 @@ namespace LearnOpenTK
         public Shader GetShader() { return Shader; }
         public Shader GetSpriteShader() { return SpriteShader; }
         public TextureManager GetTextureManager() { return TextureManager; }
+        public Blocks GetBlocks() { return Blocks; }
         public World GetWorld() { return World; }
         public Player GetPlayer() { return Player; }
         public Queue GetQueue() { return queue; }

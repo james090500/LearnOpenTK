@@ -145,11 +145,6 @@ namespace LearnOpenTK.world
             Chunk? chunk;
             if (activeChunks.TryGetValue(new Vector2(regionX, regionY), out chunk))
             {
-                if (block != null)
-                {
-                    block.Position = new Vector3(x, y, z);
-                }
-
                 chunk.SetBlock(blockX, blockY, blockZ, block);
 
                 chunk.getChunkRenderer().GenerateMesh();

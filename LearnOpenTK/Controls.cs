@@ -174,6 +174,8 @@ namespace LearnOpenTK
             if ((blockHead == null || blockHead.Liquid) && (blockFeet == null || blockFeet.Liquid))
             {
                 finalPos.Y = newPos.Y;
+            } else if(player.IsFalling() && blockFeet != null) {
+                finalPos.Y -= 0.01f;
             }
 
             blockHead = Game.GetInstance().GetWorld().GetBlockAt(newPosZ + player.GetHeight());

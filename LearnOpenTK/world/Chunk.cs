@@ -12,7 +12,7 @@ namespace LearnOpenTK.world
         public static readonly int CHUNK_SIZE = 16;
         public int waterHeight = 64;
 
-        private Dictionary<int, Block[,]> blocks = new Dictionary<int, Block[,]>();
+        private Dictionary<int, byte[,]> blocks = new Dictionary<int, byte[,]>();
         
         FastNoiseLite noise = new FastNoiseLite(Game.GetInstance().GetWorld().Seed);
         private ChunkRenderer chunkRenderer;
@@ -32,11 +32,9 @@ namespace LearnOpenTK.world
             noise.SetFrequency(0.03f);
 
             //Generate blocks
-            int noisyHeight = 1;
-
             for (int y = 0; y < 80; y++)
             {
-                Block[,] blockLayer = new Block[16,16];
+                byte[,] blockLayer = new byte[16,16];
 
                 for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
                 {
@@ -44,13 +42,12 @@ namespace LearnOpenTK.world
                     {                        
                         int realBlockX = (chunkX * CHUNK_SIZE) + x;
                         int realBlockZ = (chunkY * CHUNK_SIZE) + z;
-                        noisyHeight = waterHeight + (int)(noise.GetNoise(realBlockX, realBlockZ) * 15);
+                        int noisyHeight = waterHeight + (int)(noise.GetNoise(realBlockX, realBlockZ) * 15);
 
                         //Dont waste time on nothing
                         if (y > noisyHeight && y > waterHeight) continue;
 
-                        Block? block = null;
-                        Vector3 blockPos = new Vector3(realBlockX, y, realBlockZ);
+                        Block block;
 
                         //Set the top block as long as we're about water
                         if (y == noisyHeight)
@@ -58,26 +55,6 @@ namespace LearnOpenTK.world
                             if (y > waterHeight)
                             {
                                 block = new GrassBlock();
-                                Random random = new Random();
-                                if (random.Next(250) == 1)
-                                {
-                                    for (int i = 0; i < 6; i++) {
-                                        SetBlock(x, y + i, z, new LogBlock());
-                                        if(i >= 3)
-                                        {
-                                            for(int j = -2; j < 3; j++)
-                                            {
-                                                for (int k = -2; k < 3; k++)
-                                                {
-                                                    if (x + j > 0 && x + j <= 15 && z + k > 0 && z + k <= 15)
-                                                    {
-                                                        SetBlock(x + j, y + i, z + k, new LeafBlock());
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
                             }
                             else
                             {
@@ -99,52 +76,43 @@ namespace LearnOpenTK.world
 
                         if (block != null)
                         {
-                            block.Position = blockPos;
-                            blockLayer[x, z] = block;
+                            blockLayer[x, z] = Game.GetInstance().GetBlocks().GetIdFromBlock(block);
                         }
                     }
                 }
 
-                Block[,] testBlockLayer = blocks.GetValueOrDefault(y);
-                if(testBlockLayer != null)
-                {
-                    for(int x = 0; x < testBlockLayer.GetLength(0); x++)
-                    {
-                        for (int z = 0; z < testBlockLayer.GetLength(1); z++)
-                        {
-                            if (testBlockLayer[x, z] != null)
-                            {
-                                blockLayer[x, z] = testBlockLayer[x, z];
-                            }
-                        }
-                    }
-                    blocks.Remove(y);
-                }
                 blocks.Add(y, blockLayer);
             }
         }
 
         public Block? GetBlock(int x, int y, int z)
         {
-            Block[,]? chunkLayer = blocks.GetValueOrDefault(y);
+            byte[,]? chunkLayer = blocks.GetValueOrDefault(y);
             if (chunkLayer == null) return null;
 
-            return chunkLayer[x, z];
+            Block? block = Game.GetInstance().GetBlocks().GetBlockFromId(chunkLayer[x, z]);
+            if(block != null)
+            {
+                block.Position = new Vector3((chunkX * CHUNK_SIZE) + x, y, (chunkY * CHUNK_SIZE) + z);
+            }
+
+            return block; 
         }
 
         public void SetBlock(int x, int y, int z, Block? block)
         {
-            Block[,]? chunkLayer = blocks.GetValueOrDefault(y);
-            if (chunkLayer == null)
+            byte[,]? blockLayer = blocks.GetValueOrDefault(y);
+            if (blockLayer == null)
             {
-                chunkLayer = new Block[16, 16];
-                blocks.Add(y, chunkLayer);
+                blockLayer = new byte[16, 16];
             }
 
-            chunkLayer[x, z] = block;
+            blockLayer[x, z] = Game.GetInstance().GetBlocks().GetIdFromBlock(block);
+
+            blocks[y] = blockLayer;
         }
 
-        public Dictionary<int, Block[,]> GetBlocks() { return blocks; }
+        public Dictionary<int, byte[,]> GetBlocks() { return blocks; }
 
         public Vector3 GetPosition()
         {
